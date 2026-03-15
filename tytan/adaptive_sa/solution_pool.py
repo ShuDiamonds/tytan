@@ -34,8 +34,10 @@ class SolutionPool:
         entries = sorted(self._entries.values(), key=lambda entry: float(entry["energy"]))
         self.best = entries[: self.best_k]
         if self.diverse_k > 0:
+            best_keys = {self._key(entry["state"]) for entry in self.best}
+            candidates = [entry for entry in entries if self._key(entry["state"]) not in best_keys]
             diversity = sorted(
-                entries,
+                candidates,
                 key=lambda entry: -self._mean_hamming(entry["state"]),
             )
             self.diverse = diversity[: self.diverse_k]
