@@ -5,6 +5,9 @@ import numpy as np
 import numpy.random as nr
 from copy import deepcopy
 
+from .adaptive_sa.adaptive_bulk_sa import AdaptiveBulkSASampler
+from .adaptive_sa.reference_sa import ReferenceSASampler
+
 #共通後処理
 """
 pool=(shots, N), score=(N, )
