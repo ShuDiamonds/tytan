@@ -9,6 +9,9 @@ from .adaptive_sa.presolved_adaptive_bulk_sa import PresolvedAdaptiveBulkSASampl
 from .adaptive_sa.reference_sa import ReferenceSASampler
 from .adaptive_sa.delta_evaluator import DeltaEvaluator
 
+from .adaptive_sa.adaptive_bulk_sa import AdaptiveBulkSASampler
+from .adaptive_sa.reference_sa import ReferenceSASampler
+
 #共通後処理
 """
 pool=(shots, N), score=(N, )
