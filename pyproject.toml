@@ -27,10 +27,13 @@ reportMissingTypeStubs = false
 reportUnknownMemberType = false
 [tool.poetry]
 name = "tytan"
-version = "0.1.0"
-description = ""
-authors = ["ShuichiFukuda <shuichi.fukuda@ficy-tech.com>"]
+description = "QUBO Annealing SDK"
+authors = ["Tytan Developers <info@blueqat.com>", "ShuichiFukuda <shuichi.fukuda@ficy-tech.com>"]
+license = "Apache-2.0"  # ここにライセンスを追加
 readme = "README.md"
+homepage = "https://github.com/tytansdk/tytan"
+repository = "https://github.com/tytansdk/tytan"
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
