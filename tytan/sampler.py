@@ -1,9 +1,13 @@
-import sys
-import time
-import requests
+import math
+from typing import Optional, Sequence, Tuple
+
 import numpy as np
 import numpy.random as nr
-from copy import deepcopy
+
+from .adaptive_sa.adaptive_bulk_sa import AdaptiveBulkSASampler
+from .adaptive_sa.presolved_adaptive_bulk_sa import PresolvedAdaptiveBulkSASampler
+from .adaptive_sa.reference_sa import ReferenceSASampler
+from .adaptive_sa.delta_evaluator import DeltaEvaluator
 
 from .adaptive_sa.adaptive_bulk_sa import AdaptiveBulkSASampler
 from .adaptive_sa.reference_sa import ReferenceSASampler
@@ -36,152 +40,198 @@ def get_result(pool, score, index_map):
     return result
 
 
-#謎のglobal対応
-score2 = 0
 
-#アニーリング
+
 class SASampler:
-    def __init__(self, seed=None):
-        #乱数シード
+    """CPU-based simulated annealing sampler with modern API hooks."""
+
+    def __init__(self, seed: Optional[int] = None) -> None:
         self.seed = seed
 
-    
-    def run(self, hobomix, shots=100, T_num=2000, show=False):
-        global score2
-        
-        #解除
-        hobo, index_map = hobomix
-        # print(index_map)
-        
-        #matrixサイズ
-        N = len(hobo)
-        # print(N)
-        
-        #次数
-        ho = len(hobo.shape)
-        # print(ho)
-        
-        #シード固定
-        nr.seed(self.seed)
-        
-        #
+    def run(
+        self,
+        hobomix: Tuple[np.ndarray, dict],
+        shots: int = 100,
+        num_sweeps: Optional[int] = None,
+        num_sweeps_per_beta: int = 1,
+        beta_range: Optional[Tuple[float, float]] = None,
+        beta_schedule_type: str = "geometric",
+        beta_schedule: Optional[Sequence[float]] = None,
+        initial_states: Optional[Sequence[Sequence[float]]] = None,
+        initial_states_generator: str = "random",
+        enable_polish: bool = True,
+        update_mode: str = "single_flip",
+        seed: Optional[int] = None,
+        return_stats: bool = False,
+        show: bool = False,
+        T_num: Optional[int] = None,
+    ):
+        del show
+        qmatrix, index_map = hobomix
         shots = max(int(shots), 1)
-        
-        # プール初期化
-        pool_num = shots
-        pool = nr.randint(0, 2, (pool_num, N)).astype(float)
-        # print(pool)
-        
-        """
-        poolの重複を解除する
-        """
-        # 重複は振り直し
-        # パリエーションに余裕あれば確定非重複
-        if pool_num < 2 ** (N - 1):
-            # print('remake 1')
-            for i in range(pool_num - 1):
-                for j in range(i + 1, pool_num):
-                    while (pool[i] == pool[j]).all():
-                        pool[j] = nr.randint(0, 2, N)
-        else:
-            # パリエーションに余裕なければ3トライ重複可
-            # print('remake 2')
-            for i in range(pool_num - 1):
-                for j in range(i + 1, pool_num):
-                    count = 0
-                    while (pool[i] == pool[j]).all():
-                        pool[j] = nr.randint(0, 2, N)
-                        count += 1
-                        if count == 3:
-                            break
-        
-        #スコア初期化
-        score = np.zeros(pool_num)
-        
-        #スコア計算
-        k = ',Na,Nb,Nc,Nd,Ne,Nf,Ng,Nh,Nj,Nk,Nl,Nm,Nn,No,Np,Nq,Nr,Ns,Nt,Nu,Nv,Nw,Nx,Ny,Nz'
-        l = 'abcdefghjklmnopqrstuvwxyz'
-        s = l[:ho] + k[:3*ho] + '->N'
-        # print(s)
-        
-        operands = [hobo] + [pool] * ho
-        score = np.einsum(s, *operands)
-        # print(score)
-        
-        # フリップ数リスト（2個まで下がる）
-        flip = np.sort(nr.rand(T_num) ** 3)[::-1]
-        flip = (flip * max(0, N * 0.5 - 2)).astype(int) + 2
-        # print(flip)
-        
-        # フリップマスクリスト
-        flip_mask = [[1] * flip[0] + [0] * (N - flip[0])]
-        if N <= 2:
-            flip_mask = np.ones((T_num, N), int)
-        else:
-            for i in range(1, T_num):
-                tmp = [1] * flip[i] + [0] * (N - flip[i])
-                nr.shuffle(tmp)
-                # 前と重複なら振り直し
-                while tmp == flip_mask[-1]:
-                    nr.shuffle(tmp)
-                flip_mask.append(tmp)
-            flip_mask = np.array(flip_mask, bool)
-        # print(flip_mask.shape)
-        
-        # 局所探索フリップマスクリスト
-        single_flip_mask = np.eye(N, dtype=bool)
-        
-        """
-        アニーリング＋1フリップ
-        """
-        # アニーリング
-        # 集団まるごと温度を下げる
-        for fm in flip_mask:
-            # フリップ後　pool_num, N
-            # pool2 = np.where(fm, 1 - pool, pool)
-            pool2 = pool.copy()
-            pool2[:, fm] = 1. - pool[:, fm]
-            # score2 = np.sum((pool2 @ qmatrix) * pool2, axis=1)
-            
-            operands = [hobo] + [pool2] * ho
-            score2 = np.einsum(s, *operands)
-            
-            # 更新マスク
-            update_mask = score2 < score
-            # print(update_mask)
-    
-            # 更新
-            pool[update_mask] = pool2[update_mask]
-            score[update_mask] = score2[update_mask]
-        
-        # 最後に1フリップ局所探索
-        # 集団まるごと
-        for fm in single_flip_mask:
-            # フリップ後
-            # pool2 = np.where(fm, 1 - pool, pool)
-            pool2 = pool.copy()
-            pool2[:, fm] = 1. - pool[:, fm]
-            # score2 = np.sum((pool2 @ qmatrix) * pool2, axis=1)
-            
-            operands = [hobo] + [pool2] * ho
-            score2 = np.einsum(s, *operands)
-            
-            # 更新マスク
-            update_mask = score2 < score
-            # print(update_mask)
-    
-            # 更新
-            pool[update_mask] = pool2[update_mask]
-            score[update_mask] = score2[update_mask]
-        pool = pool.astype(int)
-        
-        # ----------
-        #共通後処理
-        result = get_result(pool, score, index_map)
-        
+        sweeps = num_sweeps if num_sweeps is not None else T_num
+        sweeps = sweeps if sweeps is not None else 1000
+        if sweeps < 0:
+            raise ValueError("num_sweeps must be non-negative")
+        if num_sweeps_per_beta < 1:
+            raise ValueError("num_sweeps_per_beta must be at least 1")
+        if update_mode != "single_flip":
+            raise ValueError("only 'single_flip' update_mode is supported")
+
+        rng_seed = seed if seed is not None else self.seed
+        rng = np.random.default_rng(rng_seed)
+
+        evaluator = DeltaEvaluator(qmatrix)
+        states = self._initialize_states(
+            shots, qmatrix.shape[0], rng, initial_states, initial_states_generator
+        )
+        energies = np.array([evaluator.evaluate(state) for state in states])
+        best_idx = int(np.argmin(energies))
+        best_energy = float(energies[best_idx])
+
+        steps_per_beta = num_sweeps_per_beta
+        beta_numbers = max(1, math.ceil(sweeps / steps_per_beta))
+        betas = self._build_beta_schedule(
+            beta_range,
+            beta_schedule_type,
+            beta_schedule,
+            beta_numbers,
+            qmatrix,
+        )
+        beta_range_actual = (float(np.min(betas)), float(np.max(betas)))
+
+        acceptance = 0
+        proposals = 0
+        energy_trace = [best_energy]
+        sweeps_done = 0
+
+        for beta in betas:
+            if sweeps_done >= sweeps:
+                break
+            sweeps_this_beta = min(steps_per_beta, sweeps - sweeps_done)
+            for _ in range(sweeps_this_beta):
+                sweeps_done += 1
+                for idx in range(states.shape[1]):
+                    proposals += shots
+                    for shot_idx in range(shots):
+                        delta = evaluator.delta(states[shot_idx], idx, energies[shot_idx])
+                        if delta <= 0 or rng.random() < np.exp(-beta * delta):
+                            states[shot_idx, idx] = 1.0 - states[shot_idx, idx]
+                            energies[shot_idx] += delta
+                            acceptance += 1
+                            if energies[shot_idx] < best_energy:
+                                best_energy = float(energies[shot_idx])
+                energy_trace.append(best_energy)
+                if sweeps_done >= sweeps:
+                    break
+        if enable_polish:
+            for idx in range(states.shape[1]):
+                for shot_idx in range(shots):
+                    delta = evaluator.delta(states[shot_idx], idx, energies[shot_idx])
+                    if delta < 0:
+                        states[shot_idx, idx] = 1.0 - states[shot_idx, idx]
+                        energies[shot_idx] += delta
+                        if energies[shot_idx] < best_energy:
+                            best_energy = float(energies[shot_idx])
+
+        states = states.astype(int)
+        result = get_result(states, energies, index_map)
+
+        stats = {
+            "best_energy": best_energy,
+            "acceptance_rate": acceptance / max(proposals, 1),
+            "energy_trace": energy_trace,
+            "beta_range": beta_range_actual,
+        }
+
+        if return_stats:
+            return result, stats
         return result
 
+    def _initialize_states(
+        self,
+        shots: int,
+        dims: int,
+        rng: np.random.Generator,
+        initial_states: Optional[Sequence[Sequence[float]]],
+        generator: str,
+    ) -> np.ndarray:
+        if initial_states is not None:
+            arr = np.asarray(initial_states, dtype=float)
+            if arr.ndim == 1:
+                arr = arr.reshape(1, -1)
+            if arr.shape[1] != dims:
+                raise ValueError(
+                    f"initial_states must have {dims} columns, got {arr.shape[1]}"
+                )
+            arr = np.clip(np.round(arr), 0, 1)
+            if arr.shape[0] >= shots:
+                return arr[:shots].copy()
+            repeats = math.ceil(shots / arr.shape[0])
+            tiled = np.tile(arr, (repeats, 1))[:shots]
+            return tiled.copy()
 
+        generator = generator.lower()
+        if generator == "random":
+            return rng.integers(0, 2, size=(shots, dims), dtype=int).astype(float)
+        if generator == "tile":
+            template = rng.integers(0, 2, size=(max(1, min(shots, dims)), dims), dtype=int)
+            repeats = math.ceil(shots / template.shape[0])
+            return np.tile(template, (repeats, 1))[:shots].astype(float)
+        if generator == "none":
+            raise ValueError("initial_states_generator 'none' requires explicit initial_states")
+        raise ValueError("initial_states_generator must be random, tile, or none")
+
+    def _build_beta_schedule(
+        self,
+        beta_range: Optional[Tuple[float, float]],
+        schedule_type: str,
+        custom_schedule: Optional[Sequence[float]],
+        beta_numbers: int,
+        qmatrix: np.ndarray,
+    ) -> np.ndarray:
+        if custom_schedule is not None:
+            betas = np.asarray(custom_schedule, dtype=float)
+            if betas.ndim != 1 or len(betas) == 0:
+                raise ValueError("beta_schedule must be a non-empty sequence")
+            return betas
+
+        schedule_type = schedule_type.lower()
+        beta_min, beta_max = self._resolve_beta_range(beta_range, qmatrix)
+        if beta_numbers < 1:
+            raise ValueError("beta_numbers must be at least 1")
+
+        if schedule_type == "linear":
+            return np.linspace(beta_min, beta_max, beta_numbers)
+        if schedule_type == "geometric":
+            if beta_min <= 0 or beta_max <= 0:
+                raise ValueError("geometric schedule requires positive beta range")
+            exponents = np.linspace(0.0, 1.0, beta_numbers)
+            ratio = beta_max / beta_min
+            return beta_min * (ratio ** exponents)
+        if schedule_type == "custom":
+            raise ValueError("beta_schedule_type 'custom' requires beta_schedule data")
+        raise ValueError("beta_schedule_type must be linear or geometric when beta_schedule is None")
+
+    def _resolve_beta_range(
+        self, beta_range: Optional[Tuple[float, float]], qmatrix: np.ndarray
+    ) -> Tuple[float, float]:
+        if beta_range is not None:
+            if len(beta_range) != 2:
+                raise ValueError("beta_range must be a tuple of (min, max)")
+            beta_min, beta_max = float(beta_range[0]), float(beta_range[1])
+            if beta_min <= 0 or beta_max <= 0:
+                raise ValueError("beta_range values must be positive")
+            if beta_min == beta_max:
+                beta_max = beta_min + 1e-6
+            return min(beta_min, beta_max), max(beta_min, beta_max)
+        scale = float(np.max(np.abs(qmatrix)))
+        scale = max(scale, 1e-6)
+        beta_min = 0.02 / scale
+        beta_max = 4.0 / scale
+        if beta_min >= beta_max:
+            beta_max = beta_min + 1e-3
+        return beta_min, beta_max
 class GASampler:
     def __init__(self, seed=None):
         self.max_gen = 1000000

@@ -25,3 +25,30 @@ exclude = [
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
+[tool.poetry]
+name = "tytan"
+description = "QUBO Annealing SDK"
+authors = ["Tytan Developers <info@blueqat.com>", "ShuichiFukuda <shuichi.fukuda@ficy-tech.com>"]
+license = "Apache-2.0"  # ここにライセンスを追加
+readme = "README.md"
+homepage = "https://github.com/tytansdk/tytan"
+repository = "https://github.com/tytansdk/tytan"
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+httpx = "^0.28.1"
+numpy = "^2.4.3"
+pandas = "^3.0.1"
+ulid-py = "^1.1.0"
+sympy = "^1.14.0"
+scipy = "^1.17.1"
+symengine = "^0.14.1"
+requests = "^2.32.5"
+pytest = "^9.0.2"
+vcrpy = "^8.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

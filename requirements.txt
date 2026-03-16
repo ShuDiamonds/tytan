@@ -1,8 +1,0 @@
-httpx
-ulid-py
-numpy
-pandas
-sympy
-scipy
-symengine
-requests
