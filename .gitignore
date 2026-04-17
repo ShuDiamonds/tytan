@@ -26,3 +26,6 @@ htmlcov/
 # Project-local temporary outputs
 uv.lock
 diff.txt
+
+# Keep docs local-only on this branch
+docs/
