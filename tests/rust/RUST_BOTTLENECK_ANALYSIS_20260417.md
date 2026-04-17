@@ -74,13 +74,9 @@ Move the inner loop (per-shot computation) entirely into Rust so FFI round-trips
 ## Implementation Status
 
 - [x] Diagnosis complete
-- [ ] Phase 1: Slice-based delta (reduce copy overhead)
-- [ ] Phase 2: GIL release
-- [ ] Phase 3: Integrate anneal loop into Rust
-- [x] Diagnosis complete
 - [x] Phase 1: Slice-based delta (reduce copy overhead) - COMPLETED
-- [ ] Phase 2: GIL release
-- [ ] Phase 3: Integrate anneal loop into Rust
+- [x] Phase 2: GIL release (`py.allow_threads`) - COMPLETED
+- [x] Phase 3: Integrate anneal loop into Rust (`sa_step_single_flip`) - COMPLETED
 
 ## Post-Fix Measurements (Phase 1 implemented)
 
@@ -118,6 +114,38 @@ Result: Eliminated 205+ KB array copy per call, directly addressing the profilin
 
 ## Remaining Opportunities
 
-1. GIL Release: Wrap long computations with `py.allow_threads()`
-2. Inner Loop in Rust: Move entire SA step loop to reduce FFI round-trips
+1. ~~GIL Release: Wrap long computations with `py.allow_threads()`~~ ✅ Done
+2. ~~Inner Loop in Rust: Move entire SA step loop to reduce FFI round-trips~~ ✅ Done (sa_step_single_flip)
 3. Release Build: Current benchmarks use debug binary; release build may show further gains
+4. Replace naive O(n²) energy computation in `delta_energy_impl` with BLAS / optimized routine to close gap vs numpy
+
+## Phase 3 Dedicated Benchmark (`tools/bench_phase3.py`)
+
+Benchmark compares three paths for `steps` SA iterations over all shots, using the same initial
+state. Measurements on macOS, shots=64, dims=128, steps=200, repeats=5.
+
+| Path | Median (s) | StdDev (s) | vs pure_python | vs batch_delta |
+|---|---:|---:|---:|---:|
+| pure_python | 0.0388 | 0.0003 | 1.00x (baseline) | 0.03x |
+| batch_delta | 1.3134 | 0.0292 | 33.81x | 1.00x (baseline) |
+| sa_step_rust | 1.2903 | 0.0136 | 33.22x | **0.98x (2% faster)** |
+
+### Interpretation
+
+- Phase 3 (`sa_step_single_flip`) eliminates the Python acceptance loop (64 × 200 = 12,800
+  iterations) and achieves a **1.02x** speedup over the Phase-2 `batch_delta` path.
+- The improvement is negligible because the FFI boundary is crossed 200 times in both paths
+  (once per step) — the acceptance-loop cost is tiny compared to Rust computation overhead.
+- Both Rust paths remain ~33x slower than `pure_python` (numpy).
+- **Root cause unchanged**: `delta_energy_impl` still calls `state.to_vec()` internally
+  (a ~1 KB copy per flip) and uses a naive O(n²) loop without BLAS.  Until the inner delta
+  computation matches numpy's vectorised throughput, moving the loop boundary into Rust yields
+  only marginal gains.
+
+### Reproducing
+
+```bash
+PYTHONPATH=. python tools/bench_phase3.py
+# Override parameters:
+SHOTS=128 DIMS=256 STEPS=5 REPEATS=7 python tools/bench_phase3.py
+```
