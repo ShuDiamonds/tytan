@@ -22,13 +22,13 @@
 
 ## 実行方法
 ```bash
-poetry run pytest tests/adaptive_sa
+uv run pytest tests/adaptive_sa
 ```
 
-`poetry` を使うことで、プロジェクトに手軽に必要な依存関係をインストールしてテストが実行できます。`poetry run` で Python 仮想環境内から `pytest` を起動するため、他の環境を汚さずに済みます。
+`uv` を使うことで、プロジェクトに必要な依存関係を同期したうえでテストが実行できます。`uv run` で Python 仮想環境内から `pytest` を起動するため、他の環境を汚さずに済みます。
 
 ## 環境準備
-- `poetry install` により依存モジュールを整備してください。すでに `vcrpy`, `numpy`, `pytest` などを `pyproject.toml` で指定しています。
+- `uv sync --all-groups` により依存モジュールを整備してください。`vcrpy`, `numpy`, `pytest` などを `pyproject.toml` で管理しています。
 - macOS や Linux 上で `python` 3.11 系が動いていれば動作します。
 
 ## 想定する使い方

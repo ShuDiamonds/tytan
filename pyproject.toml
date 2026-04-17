@@ -25,30 +25,51 @@ exclude = [
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 reportUnknownMemberType = false
-[tool.poetry]
+[project]
 name = "tytan"
+version = "0.1.4"
 description = "QUBO Annealing SDK"
-authors = ["Tytan Developers <info@blueqat.com>", "ShuichiFukuda <shuichi.fukuda@ficy-tech.com>"]
-license = "Apache-2.0"  # ここにライセンスを追加
 readme = "README.md"
-homepage = "https://github.com/tytansdk/tytan"
-repository = "https://github.com/tytansdk/tytan"
+requires-python = ">=3.11,<4"
+license = "Apache-2.0"
+authors = [
+    { name = "Tytan Developers", email = "info@blueqat.com" },
+    { name = "ShuichiFukuda", email = "shuichi.fukuda@ficy-tech.com" },
+]
+dependencies = [
+    "httpx>=0.28.1,<0.29",
+    "numpy>=2.4.3,<3",
+    "pandas>=3.0.1,<4",
+    "ulid-py>=1.1.0,<2",
+    "sympy>=1.14.0,<2",
+    "scipy>=1.17.1,<2",
+    "symengine>=0.14.1,<0.15",
+    "requests>=2.32.5,<3",
+]
 
+[project.urls]
+Homepage = "https://github.com/tytansdk/tytan"
+Repository = "https://github.com/tytansdk/tytan"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-httpx = "^0.28.1"
-numpy = "^2.4.3"
-pandas = "^3.0.1"
-ulid-py = "^1.1.0"
-sympy = "^1.14.0"
-scipy = "^1.17.1"
-symengine = "^0.14.1"
-requests = "^2.32.5"
-pytest = "^9.0.2"
-vcrpy = "^8.1.1"
+[dependency-groups]
+dev = [
+    "black",
+    "pre-commit",
+    "pyright",
+]
+test = [
+    "pytest>=9.0.2,<10",
+    "pytest-cov",
+    "pytest-recording",
+    "vcrpy>=8.1.1,<9",
+]
 
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[tool.setuptools.packages.find]
+include = ["tytan*"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"

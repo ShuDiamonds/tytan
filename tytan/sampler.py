@@ -60,6 +60,7 @@ class SASampler:
         initial_states: Optional[Sequence[Sequence[float]]] = None,
         initial_states_generator: str = "random",
         enable_polish: bool = True,
+        polish_passes: int = 1,
         update_mode: str = "single_flip",
         seed: Optional[int] = None,
         return_stats: bool = False,
@@ -83,7 +84,11 @@ class SASampler:
 
         evaluator = DeltaEvaluator(qmatrix)
         states = self._initialize_states(
-            shots, qmatrix.shape[0], rng, initial_states, initial_states_generator
+            shots,
+            qmatrix.shape[0],
+            rng,
+            initial_states,
+            initial_states_generator,
         )
         energies = np.array([evaluator.evaluate(state) for state in states])
         best_idx = int(np.argmin(energies))
@@ -124,15 +129,22 @@ class SASampler:
                 energy_trace.append(best_energy)
                 if sweeps_done >= sweeps:
                     break
-        if enable_polish:
-            for idx in range(states.shape[1]):
-                for shot_idx in range(shots):
-                    delta = evaluator.delta(states[shot_idx], idx, energies[shot_idx])
-                    if delta < 0:
-                        states[shot_idx, idx] = 1.0 - states[shot_idx, idx]
-                        energies[shot_idx] += delta
-                        if energies[shot_idx] < best_energy:
-                            best_energy = float(energies[shot_idx])
+        polish_rounds = 0
+        if enable_polish and polish_passes > 0:
+            for _ in range(polish_passes):
+                improved = False
+                for idx in range(states.shape[1]):
+                    for shot_idx in range(shots):
+                        delta = evaluator.delta(states[shot_idx], idx, energies[shot_idx])
+                        if delta < 0:
+                            states[shot_idx, idx] = 1.0 - states[shot_idx, idx]
+                            energies[shot_idx] += delta
+                            improved = True
+                            if energies[shot_idx] < best_energy:
+                                best_energy = float(energies[shot_idx])
+                polish_rounds += 1
+                if not improved:
+                    break
 
         states = states.astype(int)
         result = get_result(states, energies, index_map)
@@ -142,6 +154,7 @@ class SASampler:
             "acceptance_rate": acceptance / max(proposals, 1),
             "energy_trace": energy_trace,
             "beta_range": beta_range_actual,
+            "polish_rounds": polish_rounds,
         }
 
         if return_stats:
@@ -225,6 +238,7 @@ class SASampler:
             if beta_min == beta_max:
                 beta_max = beta_min + 1e-6
             return min(beta_min, beta_max), max(beta_min, beta_max)
+
         scale = float(np.max(np.abs(qmatrix)))
         scale = max(scale, 1e-6)
         beta_min = 0.02 / scale

@@ -66,15 +66,15 @@ pip install -U tytan
 - `test_clamp_manager.py`: soft/hard clamp 場合分けと影響の検証。
 - `test_adaptive_bulk_sa.py`: AdaptiveBulkSASampler 全体の統合結果、ログ、clamp モード反映。
 
-また、従来のクラウドAPI向けテスト（NQS/Zeke）も内部スタブで動作するようになっています。全テストは `poetry` 経由で実行するのが推奨です。
+また、従来のクラウドAPI向けテスト（NQS/Zeke）も内部スタブで動作するようになっています。全テストは `uv` 経由で実行するのが推奨です。
 
 ```bash
-poetry install
-poetry run pytest tests/adaptive_sa
-poetry run pytest tests/sampler/test_nqs_local_sampler.py tests/sampler/test_nqs_sampler.py
+uv sync --all-groups
+uv run pytest tests/adaptive_sa
+uv run pytest tests/sampler/test_nqs_local_sampler.py tests/sampler/test_nqs_sampler.py
 ```
 
-`poetry run pytest` により依存関係を自動的に解決し、実行環境を汚さずに済みます。GPUテストやベンチマーク系は現時点で `tests/adaptive_sa` に含まれていないので、手元の環境で必要に応じて追加してください。
+`uv run pytest` によりプロジェクト直下の `.venv` を使って依存関係を分離したまま実行できます。GPUテストやベンチマーク系は現時点で `tests/adaptive_sa` に含まれていないので、手元の環境で必要に応じて追加してください。
 
 ## サンプルコード１
 3個の量子ビットのうち2個だけを1にする例です。結果は「量子ビットの値」「エネルギー（コスト）値」「出現数」の順で格納されています。
