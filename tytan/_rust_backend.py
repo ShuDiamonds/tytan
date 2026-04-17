@@ -42,6 +42,15 @@ def rust_min_work() -> int:
         return 0
 
 
+def rust_step_min_work() -> int:
+    """Return minimum work threshold for enabling whole-step Rust path."""
+    raw = os.getenv("TYTAN_RUST_STEP_MIN_WORK", "4096").strip()
+    try:
+        return max(int(raw), 0)
+    except ValueError:
+        return 4096
+
+
 def _load_rust_module():
     mode = _mode()
     if mode == "off":
@@ -150,3 +159,29 @@ def try_aggregate_results_fast(
     if _RUST_MODULE is None:
         return None
     return _RUST_MODULE.aggregate_results(states_f, energies_f, list(variable_names))
+
+
+def try_sa_step_single_flip(
+    states: np.ndarray,
+    energies: np.ndarray,
+    qmatrix: np.ndarray,
+    beta: float,
+    rng_state: int,
+):
+    if _RUST_MODULE is None:
+        return None
+    states_f = _as_float64_c(states)
+    energies_f = _as_float64_c(energies)
+    qmatrix_f = _as_float64_c(qmatrix)
+    next_states, next_energies, stats = _RUST_MODULE.sa_step_single_flip(
+        states_f,
+        energies_f,
+        qmatrix_f,
+        float(beta),
+        int(rng_state),
+    )
+    return (
+        _as_float64_c(next_states),
+        _as_float64_c(next_energies),
+        dict(stats),
+    )

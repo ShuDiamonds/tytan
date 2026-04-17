@@ -10,6 +10,7 @@ mod types;
 
 #[pyfunction(signature = (state, qmatrix, index, current_energy=None))]
 fn delta_energy(
+    py: Python<'_>,
     state: PyReadonlyArray1<'_, f64>,
     qmatrix: PyReadonlyArray2<'_, f64>,
     index: usize,
@@ -27,14 +28,16 @@ fn delta_energy(
         PyValueError::new_err("Q matrix must be C-contiguous")
     })?;
 
-    delta::delta_energy_impl(
-        state_slice,
-        q_slice,
-        q_shape[0],
-        q_shape[1],
-        index,
-        current_energy,
-    )
+    py.allow_threads(|| {
+        delta::delta_energy_impl(
+            state_slice,
+            q_slice,
+            q_shape[0],
+            q_shape[1],
+            index,
+            current_energy,
+        )
+    })
     .map_err(PyValueError::new_err)
 }
 
@@ -73,17 +76,20 @@ fn batch_delta<'py>(
         indices_vec.push(*value as usize);
     }
 
-    let out = delta::batch_delta_impl(
-        states_slice,
-        s_shape[0],
-        s_shape[1],
-        q_slice,
-        q_shape[0],
-        q_shape[1],
-        &indices_vec,
-        energies_slice,
-    )
-    .map_err(PyValueError::new_err)?;
+    let out = py
+        .allow_threads(|| {
+            delta::batch_delta_impl(
+                states_slice,
+                s_shape[0],
+                s_shape[1],
+                q_slice,
+                q_shape[0],
+                q_shape[1],
+                &indices_vec,
+                energies_slice,
+            )
+        })
+        .map_err(PyValueError::new_err)?;
 
     Ok(PyArray1::from_vec_bound(py, out))
 }
@@ -109,7 +115,8 @@ fn aggregate_results(
     let energies_slice = e_view.as_slice().ok_or_else(|| {
         PyValueError::new_err("Energies array must be C-contiguous")
     })?;
-    let entries = reduce::aggregate_results_impl(states_slice, s_shape[0], s_shape[1], energies_slice)
+    let entries = py
+        .allow_threads(|| reduce::aggregate_results_impl(states_slice, s_shape[0], s_shape[1], energies_slice))
         .map_err(PyValueError::new_err)?;
 
     let rows = PyList::empty_bound(py);
@@ -142,22 +149,31 @@ fn sa_step_single_flip<'py>(
 
     let s_shape = s_view.shape();
     let q_shape = q_view.shape();
-    let states_flat: Vec<f64> = s_view.iter().copied().collect();
-    let energies_vec = e_view.to_vec();
-    let q_flat: Vec<f64> = q_view.iter().copied().collect();
+    let states_slice = s_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("States array must be C-contiguous")
+    })?;
+    let energies_slice = e_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Energies array must be C-contiguous")
+    })?;
+    let q_slice = q_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Q matrix must be C-contiguous")
+    })?;
 
-    let (next_states_flat, next_energies, next_rng, stats) = anneal::sa_step_single_flip_impl(
-        &states_flat,
-        s_shape[0],
-        s_shape[1],
-        &energies_vec,
-        &q_flat,
-        q_shape[0],
-        q_shape[1],
-        beta,
-        rng_state,
-    )
-    .map_err(PyValueError::new_err)?;
+    let (next_states_flat, next_energies, next_rng, stats) = py
+        .allow_threads(|| {
+            anneal::sa_step_single_flip_impl(
+                states_slice,
+                s_shape[0],
+                s_shape[1],
+                energies_slice,
+                q_slice,
+                q_shape[0],
+                q_shape[1],
+                beta,
+                rng_state,
+            )
+        })
+        .map_err(PyValueError::new_err)?;
 
     let mut rows = Vec::with_capacity(s_shape[0]);
     for chunk in next_states_flat.chunks(s_shape[1]) {

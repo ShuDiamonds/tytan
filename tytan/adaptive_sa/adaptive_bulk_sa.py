@@ -69,6 +69,12 @@ class AdaptiveBulkSASampler:
             return True
         return shots * size >= min_work
 
+    def _should_use_rust_step(self, shots: int, size: int) -> bool:
+        min_work = _rust_backend.rust_step_min_work()
+        if min_work <= 0:
+            return False
+        return shots * size >= min_work
+
     def run(
         self,
         qubomix: Tuple[np.ndarray, Dict[str, int]],
@@ -86,6 +92,7 @@ class AdaptiveBulkSASampler:
         evaluator = DeltaEvaluator(qmatrix_f)
         energies = np.array([evaluator.evaluate(state) for state in states])
         energies = np.ascontiguousarray(energies, dtype=float)
+        rust_rng_state = int(self.rng.randint(1, np.iinfo(np.int64).max))
         pool = SolutionPool(best_k=min(self.batch_size, shots), diverse_k=2)
         best_idx = int(np.argmin(energies))
         best_energy = float(energies[best_idx])
@@ -94,6 +101,47 @@ class AdaptiveBulkSASampler:
             strategy = self.strategy_manager.select()
             temperature = self._temperature(step, strategy.get("type", "linear"))
             improvements = 0
+            use_rust_step = self.device == "cpu" and _rust_backend.rust_available() and self._should_use_rust_step(shots, qmatrix_f.shape[0])
+            if use_rust_step:
+                step_result = _rust_backend.try_sa_step_single_flip(
+                    states,
+                    energies,
+                    qmatrix_f,
+                    1.0 / temperature,
+                    rust_rng_state,
+                )
+                if step_result is not None:
+                    next_states, next_energies, step_stats = step_result
+                    changed_mask = np.any(next_states != states, axis=1)
+                    accepted_indices = np.flatnonzero(changed_mask)
+                    improvements = int(step_stats.get("accepted", int(len(accepted_indices))))
+                    if accepted_indices.size > 0:
+                        deltas = next_energies[accepted_indices] - energies[accepted_indices]
+                        states = np.ascontiguousarray(next_states, dtype=float)
+                        energies = np.ascontiguousarray(next_energies, dtype=float)
+                        for accepted_idx in accepted_indices.tolist():
+                            pool.offer(states[accepted_idx], energies[accepted_idx])
+                            if energies[accepted_idx] < best_energy:
+                                best_energy = float(energies[accepted_idx])
+                                best_state = states[accepted_idx].copy()
+                        if self.adaptive:
+                            self.strategy_manager.record(strategy["name"], float(np.sum(-deltas)))
+                    else:
+                        states = np.ascontiguousarray(next_states, dtype=float)
+                        energies = np.ascontiguousarray(next_energies, dtype=float)
+                    rust_rng_state = int(step_stats.get("rng_state", rust_rng_state))
+                    self.logger.log(
+                        strategy=strategy["name"],
+                        temperature=temperature,
+                        improvements=improvements,
+                    )
+                    if self.enable_clamp and improvements == 0:
+                        occupancy = {
+                            idx: float(np.mean(states[:, idx]))
+                            for idx in range(qmatrix_f.shape[0])
+                        }
+                        self.clamp_manager.update_scores(occupancy)
+                    continue
             indices = self.rng.randint(qmatrix_f.shape[0], size=shots, dtype=np.int64)
             if self._should_use_rust_batch(shots, qmatrix_f.shape[0]):
                 batch_delta = _rust_backend.try_batch_delta(states, qmatrix_f, indices, energies)
