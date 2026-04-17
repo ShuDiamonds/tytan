@@ -5,6 +5,8 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 
+from .. import _rust_backend
+
 from .anneal_logger import AnnealLogger
 from .clamp_manager import ClampManager
 from .delta_evaluator import DeltaEvaluator
@@ -83,9 +85,14 @@ class AdaptiveBulkSASampler:
             strategy = self.strategy_manager.select()
             temperature = self._temperature(step, strategy.get("type", "linear"))
             improvements = 0
+            indices = self.rng.randint(qmatrix.shape[0], size=shots)
+            batch_delta = _rust_backend.try_batch_delta(states, qmatrix, indices, energies)
             for i in range(shots):
-                idx = self.rng.randint(qmatrix.shape[0])
-                change = evaluator.delta(states[i], idx, energies[i])
+                idx = int(indices[i])
+                if batch_delta is None:
+                    change = evaluator.delta(states[i], idx, energies[i])
+                else:
+                    change = float(batch_delta[i])
                 threshold = (change <= 0) or self.rng.rand() < np.exp(-change / temperature)
                 if threshold:
                     states[i][idx] = 1.0 - states[i][idx]

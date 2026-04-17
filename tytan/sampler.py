@@ -11,12 +11,19 @@ from .adaptive_sa.delta_evaluator import DeltaEvaluator
 
 from .adaptive_sa.adaptive_bulk_sa import AdaptiveBulkSASampler
 from .adaptive_sa.reference_sa import ReferenceSASampler
+from . import _rust_backend
 
 #共通後処理
 """
 pool=(shots, N), score=(N, )
 """
 def get_result(pool, score, index_map):
+    keys = list(index_map.keys())
+    if all(isinstance(key, str) for key in keys):
+        rust_result = _rust_backend.try_aggregate_results(pool, score, keys)
+        if rust_result is not None:
+            return rust_result
+
     #重複解を集計
     unique_pool, original_index, unique_counts = np.unique(pool, axis=0, return_index=True, return_counts=True)
     

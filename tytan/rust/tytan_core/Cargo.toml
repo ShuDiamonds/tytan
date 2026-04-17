@@ -1,0 +1,13 @@
+[package]
+name = "tytan_core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "_tytan_rust"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py311"] }
+numpy = "0.22"
+ndarray = "0.15"

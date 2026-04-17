@@ -5,6 +5,8 @@ from typing import Optional
 
 import numpy as np
 
+from .. import _rust_backend
+
 
 class DeltaEvaluator:
     """Compute energies and incremental deltas for QUBO states."""
@@ -24,6 +26,10 @@ class DeltaEvaluator:
     def delta(self, state: np.ndarray, index: int, energy: Optional[float] = None) -> float:
         """Return change in energy when bit at index is flipped."""
         energy = self.evaluate(state) if energy is None else float(energy)
+        rust_delta = _rust_backend.try_delta_energy(state, self.qmatrix, index, energy)
+        if rust_delta is not None:
+            return float(rust_delta)
+
         flipped = state.copy().astype(float)
         if not (0 <= index < self.size):
             raise IndexError("Index out of range")
