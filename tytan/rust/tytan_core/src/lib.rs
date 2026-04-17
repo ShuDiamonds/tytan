@@ -18,12 +18,18 @@ fn delta_energy(
     let state_view = state.as_array();
     let q_view = qmatrix.as_array();
     let q_shape = q_view.shape();
-    let state_vec = state_view.to_vec();
-    let q_vec: Vec<f64> = q_view.iter().copied().collect();
+    
+    // Use slices directly if contiguous to avoid copying entire arrays
+    let state_slice = state_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("State array must be C-contiguous")
+    })?;
+    let q_slice = q_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Q matrix must be C-contiguous")
+    })?;
 
     delta::delta_energy_impl(
-        &state_vec,
-        &q_vec,
+        state_slice,
+        q_slice,
         q_shape[0],
         q_shape[1],
         index,
@@ -47,8 +53,18 @@ fn batch_delta<'py>(
 
     let s_shape = s_view.shape();
     let q_shape = q_view.shape();
-    let states_flat: Vec<f64> = s_view.iter().copied().collect();
-    let q_flat: Vec<f64> = q_view.iter().copied().collect();
+    
+    // Use slices directly to avoid copying
+    let states_slice = s_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("States array must be C-contiguous")
+    })?;
+    let q_slice = q_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Q matrix must be C-contiguous")
+    })?;
+    let energies_slice = e_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Energies array must be C-contiguous")
+    })?;
+    
     let mut indices_vec = Vec::with_capacity(i_view.len());
     for value in i_view.iter() {
         if *value < 0 {
@@ -56,17 +72,16 @@ fn batch_delta<'py>(
         }
         indices_vec.push(*value as usize);
     }
-    let energies_vec = e_view.to_vec();
 
     let out = delta::batch_delta_impl(
-        &states_flat,
+        states_slice,
         s_shape[0],
         s_shape[1],
-        &q_flat,
+        q_slice,
         q_shape[0],
         q_shape[1],
         &indices_vec,
-        &energies_vec,
+        energies_slice,
     )
     .map_err(PyValueError::new_err)?;
 
@@ -88,9 +103,13 @@ fn aggregate_results(
         return Err(PyValueError::new_err("variable_names length must match state dimension"));
     }
 
-    let states_flat: Vec<f64> = s_view.iter().copied().collect();
-    let energies_vec = e_view.to_vec();
-    let entries = reduce::aggregate_results_impl(&states_flat, s_shape[0], s_shape[1], &energies_vec)
+    let states_slice = s_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("States array must be C-contiguous")
+    })?;
+    let energies_slice = e_view.as_slice().ok_or_else(|| {
+        PyValueError::new_err("Energies array must be C-contiguous")
+    })?;
+    let entries = reduce::aggregate_results_impl(states_slice, s_shape[0], s_shape[1], energies_slice)
         .map_err(PyValueError::new_err)?;
 
     let rows = PyList::empty_bound(py);
