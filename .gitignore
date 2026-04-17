@@ -7,3 +7,25 @@ build
 .venv
 .ipynb_checkpoints
 virt
+
+# Python tool caches and test artifacts
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local environment and editor files
+.python-version
+.idea/
+.vscode/
+
+# Project-local temporary outputs
+uv.lock
+diff.txt
+
+# Keep docs local-only on this branch
+docs/
