@@ -13,6 +13,7 @@ def test_aggregate_result_format_matches_contract():
     assert rows is not None
     assert isinstance(rows, list)
     assert len(rows) == 2
+    assert rows[0][1] <= rows[1][1]
 
     first = rows[0]
     assert isinstance(first, list)
@@ -20,5 +21,7 @@ def test_aggregate_result_format_matches_contract():
     assert isinstance(first[0], dict)
     assert "x" in first[0]
     assert "y" in first[0]
+    assert isinstance(first[0]["x"], int)
+    assert isinstance(first[0]["y"], int)
     assert isinstance(first[1], float)
     assert isinstance(first[2], int)

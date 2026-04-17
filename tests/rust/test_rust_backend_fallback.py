@@ -3,6 +3,14 @@ import numpy as np
 from tytan import _rust_backend as rb
 
 
+def test_rust_available_reflects_module_presence(monkeypatch):
+    monkeypatch.setattr(rb, "_RUST_MODULE", object())
+    assert rb.rust_available() is True
+
+    monkeypatch.setattr(rb, "_RUST_MODULE", None)
+    assert rb.rust_available() is False
+
+
 def test_try_delta_energy_returns_none_without_module(monkeypatch):
     monkeypatch.setattr(rb, "_RUST_MODULE", None)
     state = np.array([1.0, 0.0], dtype=float)
