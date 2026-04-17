@@ -11,12 +11,35 @@ from typing import Optional, Sequence
 import numpy as np
 
 
+def _as_float64_c(array: np.ndarray) -> np.ndarray:
+    arr = np.asarray(array)
+    if arr.dtype == np.float64 and arr.flags.c_contiguous:
+        return arr
+    return np.ascontiguousarray(arr, dtype=float)
+
+
+def _as_int64_c(array: np.ndarray) -> np.ndarray:
+    arr = np.asarray(array)
+    if arr.dtype == np.int64 and arr.flags.c_contiguous:
+        return arr
+    return np.ascontiguousarray(arr, dtype=np.int64)
+
+
 def _debug_enabled() -> bool:
     return os.getenv("TYTAN_RUST_DEBUG", "0") == "1"
 
 
 def _mode() -> str:
     return os.getenv("TYTAN_RUST", "auto").strip().lower()
+
+
+def rust_min_work() -> int:
+    """Return minimum work threshold for enabling Rust hot paths."""
+    raw = os.getenv("TYTAN_RUST_MIN_WORK", "0").strip()
+    try:
+        return max(int(raw), 0)
+    except ValueError:
+        return 0
 
 
 def _load_rust_module():
@@ -59,8 +82,23 @@ def try_delta_energy(
 ) -> Optional[float]:
     if _RUST_MODULE is None:
         return None
-    state_f = np.asarray(state, dtype=float)
-    qmatrix_f = np.asarray(qmatrix, dtype=float)
+    state_f = _as_float64_c(state)
+    qmatrix_f = _as_float64_c(qmatrix)
+    return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy))
+
+
+def try_delta_energy_fast(
+    state_f: np.ndarray,
+    qmatrix_f: np.ndarray,
+    index: int,
+    current_energy: Optional[float] = None,
+) -> Optional[float]:
+    """Fast path for pre-normalized float arrays.
+
+    Caller must ensure input arrays have compatible dtype/shape.
+    """
+    if _RUST_MODULE is None:
+        return None
     return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy))
 
 
@@ -72,10 +110,22 @@ def try_batch_delta(
 ) -> Optional[np.ndarray]:
     if _RUST_MODULE is None:
         return None
-    states_f = np.asarray(states, dtype=float)
-    qmatrix_f = np.asarray(qmatrix, dtype=float)
-    indices_i = np.asarray(indices, dtype=np.int64)
-    energies_f = np.asarray(energies, dtype=float)
+    states_f = _as_float64_c(states)
+    qmatrix_f = _as_float64_c(qmatrix)
+    indices_i = _as_int64_c(indices)
+    energies_f = _as_float64_c(energies)
+    return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f), dtype=float)
+
+
+def try_batch_delta_fast(
+    states_f: np.ndarray,
+    qmatrix_f: np.ndarray,
+    indices_i: np.ndarray,
+    energies_f: np.ndarray,
+) -> Optional[np.ndarray]:
+    """Fast path for pre-normalized batch delta arrays."""
+    if _RUST_MODULE is None:
+        return None
     return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f), dtype=float)
 
 
@@ -86,6 +136,17 @@ def try_aggregate_results(
 ):
     if _RUST_MODULE is None:
         return None
-    states_f = np.asarray(states, dtype=float)
-    energies_f = np.asarray(energies, dtype=float)
+    states_f = _as_float64_c(states)
+    energies_f = _as_float64_c(energies)
+    return _RUST_MODULE.aggregate_results(states_f, energies_f, list(variable_names))
+
+
+def try_aggregate_results_fast(
+    states_f: np.ndarray,
+    energies_f: np.ndarray,
+    variable_names: Sequence[str],
+):
+    """Fast path for pre-normalized result aggregation arrays."""
+    if _RUST_MODULE is None:
+        return None
     return _RUST_MODULE.aggregate_results(states_f, energies_f, list(variable_names))

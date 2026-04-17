@@ -1,7 +1,7 @@
 """Adaptive bulk SA sampler that orchestrates the modular helpers."""
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -63,6 +63,12 @@ class AdaptiveBulkSASampler:
             return max(self.init_temp * (scale ** progress), 1e-8)
         return max(self.init_temp + (self.end_temp - self.init_temp) * progress, 1e-8)
 
+    def _should_use_rust_batch(self, shots: int, size: int) -> bool:
+        min_work = _rust_backend.rust_min_work()
+        if min_work <= 0:
+            return True
+        return shots * size >= min_work
+
     def run(
         self,
         qubomix: Tuple[np.ndarray, Dict[str, int]],
@@ -72,11 +78,14 @@ class AdaptiveBulkSASampler:
         qmatrix, index_map = qubomix
         if qmatrix.ndim != 2:
             raise ValueError("QUBO matrix must be 2D")
+        qmatrix_f = np.ascontiguousarray(np.asarray(qmatrix, dtype=float))
         shots = shots or self.shots
         shots = max(1, int(shots))
-        states = self.rng.randint(0, 2, size=(shots, qmatrix.shape[0])).astype(float)
-        evaluator = DeltaEvaluator(qmatrix)
+        states = self.rng.randint(0, 2, size=(shots, qmatrix_f.shape[0])).astype(float)
+        states = np.ascontiguousarray(states)
+        evaluator = DeltaEvaluator(qmatrix_f)
         energies = np.array([evaluator.evaluate(state) for state in states])
+        energies = np.ascontiguousarray(energies, dtype=float)
         pool = SolutionPool(best_k=min(self.batch_size, shots), diverse_k=2)
         best_idx = int(np.argmin(energies))
         best_energy = float(energies[best_idx])
@@ -85,8 +94,11 @@ class AdaptiveBulkSASampler:
             strategy = self.strategy_manager.select()
             temperature = self._temperature(step, strategy.get("type", "linear"))
             improvements = 0
-            indices = self.rng.randint(qmatrix.shape[0], size=shots)
-            batch_delta = _rust_backend.try_batch_delta(states, qmatrix, indices, energies)
+            indices = self.rng.randint(qmatrix_f.shape[0], size=shots, dtype=np.int64)
+            if self._should_use_rust_batch(shots, qmatrix_f.shape[0]):
+                batch_delta = _rust_backend.try_batch_delta(states, qmatrix_f, indices, energies)
+            else:
+                batch_delta = None
             for i in range(shots):
                 idx = int(indices[i])
                 if batch_delta is None:
@@ -113,7 +125,7 @@ class AdaptiveBulkSASampler:
             if self.enable_clamp and improvements == 0:
                 occupancy = {
                     idx: float(np.mean(states[:, idx]))
-                    for idx in range(qmatrix.shape[0])
+                    for idx in range(qmatrix_f.shape[0])
                 }
                 self.clamp_manager.update_scores(occupancy)
         pool.offer(best_state, best_energy)

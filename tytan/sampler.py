@@ -20,7 +20,9 @@ pool=(shots, N), score=(N, )
 def get_result(pool, score, index_map):
     keys = list(index_map.keys())
     if all(isinstance(key, str) for key in keys):
-        rust_result = _rust_backend.try_aggregate_results(pool, score, keys)
+        pool_f = np.ascontiguousarray(np.asarray(pool, dtype=float))
+        score_f = np.ascontiguousarray(np.asarray(score, dtype=float))
+        rust_result = _rust_backend.try_aggregate_results(pool_f, score_f, keys)
         if rust_result is not None:
             return rust_result
 
