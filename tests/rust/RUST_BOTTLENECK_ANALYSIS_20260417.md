@@ -126,15 +126,15 @@ state. Measurements on macOS, shots=64, dims=128, steps=200, repeats=5.
 
 | Path | Median (s) | StdDev (s) | vs pure_python | vs batch_delta |
 |---|---:|---:|---:|---:|
-| pure_python | 0.0399 | 0.0024 | 1.00x (baseline) | 6.21x |
-| batch_delta | 0.0064 | 0.0007 | 0.16x | 1.00x (baseline) |
-| sa_step_rust | 0.0034 | 0.0003 | 0.08x | **0.53x (1.90x faster)** |
+| pure_python | 0.0388 | 0.0005 | 1.00x (baseline) | 6.13x |
+| batch_delta | 0.0063 | 0.0005 | 0.16x | 1.00x (baseline) |
+| sa_step_rust | 0.0021 | 0.0003 | 0.06x | **0.34x (2.95x faster)** |
 
 ### Interpretation
 
 - Phase 3 (`sa_step_single_flip`) now wins because the bridge uses a symmetry-aware fast path
-  and the benchmark reuses the cached symmetric Q matrix hint across repeated steps.
-- The optimized Rust path is **11.81x faster than pure_python** and **1.90x faster than
+  and the Rust step no longer rebuilds the returned state matrix row-by-row.
+- The optimized Rust path is **18.08x faster than pure_python** and **2.95x faster than
   batch_delta** under the measured workload.
 - The hot case is now dominated by the cheaper symmetric delta kernel; the remaining wins are
   more likely to come from buffer reuse and larger multi-step batching.

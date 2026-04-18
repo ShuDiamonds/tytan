@@ -1,4 +1,4 @@
-use numpy::{PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
+use numpy::{ndarray::Array2, PyArray1, PyArray2, PyReadonlyArray1, PyReadonlyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
@@ -189,12 +189,9 @@ fn sa_step_single_flip<'py>(
         })
         .map_err(PyValueError::new_err)?;
 
-    let mut rows = Vec::with_capacity(s_shape[0]);
-    for chunk in next_states_flat.chunks(s_shape[1]) {
-        rows.push(chunk.to_vec());
-    }
-    let states_py = PyArray2::from_vec2_bound(py, &rows)
+    let states_array = Array2::from_shape_vec((s_shape[0], s_shape[1]), next_states_flat)
         .map_err(|_| PyValueError::new_err("Failed to build states array"))?;
+    let states_py = PyArray2::from_owned_array_bound(py, states_array);
     let energies_py = PyArray1::from_vec_bound(py, next_energies);
 
     let stats_dict = PyDict::new_bound(py);
