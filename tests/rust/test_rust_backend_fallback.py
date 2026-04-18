@@ -40,3 +40,12 @@ def test_try_sa_step_single_flip_returns_none_without_module(monkeypatch):
     energies = np.array([0.0, 0.0], dtype=float)
     q = np.array([[0.0, -1.0], [-1.0, 0.0]], dtype=float)
     assert rb.try_sa_step_single_flip(states, energies, q, beta=1.0, rng_state=1) is None
+
+
+def test_try_sa_step_multi_flip_returns_none_without_module(monkeypatch):
+    monkeypatch.setattr(rb, "_RUST_MODULE", None)
+    states = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=float)
+    energies = np.array([0.0, 0.0], dtype=float)
+    q = np.array([[0.0, -1.0], [-1.0, 0.0]], dtype=float)
+    betas = np.array([1.0, 0.5], dtype=float)
+    assert rb.try_sa_step_multi_flip(states, energies, q, betas, rng_state=1) is None

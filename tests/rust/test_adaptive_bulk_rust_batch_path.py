@@ -110,3 +110,42 @@ def test_adaptive_bulk_falls_back_from_rust_step_to_batch(monkeypatch):
     assert called["batch"] >= 1
     assert isinstance(result, list)
     assert result
+
+
+def test_adaptive_bulk_uses_multi_step_rust_path_when_not_adaptive(monkeypatch):
+    x, y = symbols("x y")
+    qubo, _ = Compile((x + y - 1) ** 2).get_qubo()
+
+    called = {"multi": 0}
+
+    def fake_multi_step(states, energies, qmatrix, betas, rng_state):
+        del qmatrix
+        called["multi"] += 1
+        history_states = np.stack(
+            [
+                np.where(np.arange(states.shape[1]) == 0, 1.0 - states, states),
+                np.where(np.arange(states.shape[1]) == 1, 1.0 - states, states),
+                np.where(np.arange(states.shape[1]) == 0, 1.0 - states, states),
+            ],
+            axis=0,
+        )
+        history_energies = np.stack([energies - 1.0, energies - 2.0, energies - 3.0], axis=0)
+        return history_states, history_energies, {"rng_state": rng_state + 3, "accepted": len(states) * 3, "proposals": len(states) * 3}
+
+    def fail_single(*args, **kwargs):
+        raise AssertionError("single-step Rust path should not be used in multi-step mode")
+
+    def fail_batch(*args, **kwargs):
+        raise AssertionError("batch delta should not be used in multi-step mode")
+
+    monkeypatch.setattr(delta_module._rust_backend, "rust_step_min_work", lambda: 1)
+    monkeypatch.setattr(delta_module._rust_backend, "try_sa_step_multi_flip", fake_multi_step)
+    monkeypatch.setattr(delta_module._rust_backend, "try_sa_step_single_flip", fail_single)
+    monkeypatch.setattr(delta_module._rust_backend, "try_batch_delta", fail_batch)
+
+    sampler = AdaptiveBulkSASampler(seed=0, shots=4, steps=3, adaptive=False)
+    result = sampler.run(qubo)
+
+    assert called["multi"] == 1
+    assert isinstance(result, list)
+    assert result

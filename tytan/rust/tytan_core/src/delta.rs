@@ -80,11 +80,7 @@ mod tests {
     #[test]
     fn delta_energy_matches_bruteforce_for_symmetric_matrix() {
         let state = [1.0, 0.0, 1.0];
-        let q = [
-            1.0, 2.0, 3.0,
-            2.0, 4.0, 5.0,
-            3.0, 5.0, 6.0,
-        ];
+        let q = [1.0, 2.0, 3.0, 2.0, 4.0, 5.0, 3.0, 5.0, 6.0];
 
         for index in 0..state.len() {
             let expected = brute_delta(&state, &q, 3, index);
@@ -95,15 +91,8 @@ mod tests {
 
     #[test]
     fn delta_energy_matches_bruteforce_for_asymmetric_matrix_and_batch_path() {
-        let states = [
-            0.0, 1.0, 0.0,
-            1.0, 1.0, 0.0,
-        ];
-        let q = [
-            1.0, 2.0, 3.0,
-            4.0, 5.0, 6.0,
-            7.0, 8.0, 9.0,
-        ];
+        let states = [0.0, 1.0, 0.0, 1.0, 1.0, 0.0];
+        let q = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
         let energies = [
             energy_of_state(&states[0..3], &q, 3),
             energy_of_state(&states[3..6], &q, 3),

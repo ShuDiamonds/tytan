@@ -185,3 +185,31 @@ def try_sa_step_single_flip(
         _as_float64_c(next_energies),
         dict(stats),
     )
+
+
+def try_sa_step_multi_flip(
+    states: np.ndarray,
+    energies: np.ndarray,
+    qmatrix: np.ndarray,
+    betas: np.ndarray,
+    rng_state: int,
+):
+    if _RUST_MODULE is None:
+        return None
+    states_f = _as_float64_c(states)
+    energies_f = _as_float64_c(energies)
+    qmatrix_f = _as_float64_c(qmatrix)
+    betas_f = _as_float64_c(betas)
+    history_states, history_energies, stats = _RUST_MODULE.sa_step_multi_flip(
+        states_f,
+        energies_f,
+        qmatrix_f,
+        betas_f,
+        int(rng_state),
+    )
+    steps = int(len(betas_f))
+    shots = int(states_f.shape[0])
+    dims = int(states_f.shape[1])
+    history_states = np.asarray(history_states, dtype=float).reshape(steps, shots, dims)
+    history_energies = np.asarray(history_energies, dtype=float).reshape(steps, shots)
+    return history_states, history_energies, dict(stats)

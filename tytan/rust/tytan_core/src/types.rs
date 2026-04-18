@@ -1,4 +1,8 @@
-pub fn validate_square_matrix(flat_len: usize, nrows: usize, ncols: usize) -> Result<(), &'static str> {
+pub fn validate_square_matrix(
+    flat_len: usize,
+    nrows: usize,
+    ncols: usize,
+) -> Result<(), &'static str> {
     if nrows == 0 || ncols == 0 {
         return Err("QUBO matrix must be non-empty");
     }
