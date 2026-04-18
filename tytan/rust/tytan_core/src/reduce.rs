@@ -8,7 +8,12 @@ pub struct AggregatedEntry {
     pub first_index: usize,
 }
 
-pub fn aggregate_results_impl(states_flat: &[f64], shots: usize, dims: usize, energies: &[f64]) -> Result<Vec<AggregatedEntry>, &'static str> {
+pub fn aggregate_results_impl(
+    states_flat: &[f64],
+    shots: usize,
+    dims: usize,
+    energies: &[f64],
+) -> Result<Vec<AggregatedEntry>, &'static str> {
     if states_flat.len() != shots * dims {
         return Err("States data size mismatch");
     }

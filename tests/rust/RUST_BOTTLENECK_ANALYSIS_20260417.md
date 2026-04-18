@@ -74,13 +74,9 @@ Move the inner loop (per-shot computation) entirely into Rust so FFI round-trips
 ## Implementation Status
 
 - [x] Diagnosis complete
-- [ ] Phase 1: Slice-based delta (reduce copy overhead)
-- [ ] Phase 2: GIL release
-- [ ] Phase 3: Integrate anneal loop into Rust
-- [x] Diagnosis complete
 - [x] Phase 1: Slice-based delta (reduce copy overhead) - COMPLETED
-- [ ] Phase 2: GIL release
-- [ ] Phase 3: Integrate anneal loop into Rust
+- [x] Phase 2: GIL release (`py.allow_threads`) - COMPLETED
+- [x] Phase 3: Integrate anneal loop into Rust (`sa_step_single_flip`) - COMPLETED
 
 ## Post-Fix Measurements (Phase 1 implemented)
 
@@ -118,6 +114,35 @@ Result: Eliminated 205+ KB array copy per call, directly addressing the profilin
 
 ## Remaining Opportunities
 
-1. GIL Release: Wrap long computations with `py.allow_threads()`
-2. Inner Loop in Rust: Move entire SA step loop to reduce FFI round-trips
-3. Release Build: Current benchmarks use debug binary; release build may show further gains
+1. ~~GIL Release: Wrap long computations with `py.allow_threads()`~~ ✅ Done
+2. ~~Inner Loop in Rust: Move entire SA step loop to reduce FFI round-trips~~ ✅ Done (sa_step_single_flip)
+3. Release Build: Current benchmarks are now running against the rebuilt release extension; continue tracking deltas across revisions
+4. Keep expanding the symmetry-aware fast path and cache hit rate for reused Q matrices
+
+## Phase 3 Dedicated Benchmark (`tools/bench_phase3.py`)
+
+Benchmark compares three paths for `steps` SA iterations over all shots, using the same initial
+state. Measurements on macOS, shots=64, dims=128, steps=200, repeats=5.
+
+| Path | Median (s) | StdDev (s) | vs pure_python | vs batch_delta |
+|---|---:|---:|---:|---:|
+| pure_python | 0.0388 | 0.0005 | 1.00x (baseline) | 6.13x |
+| batch_delta | 0.0063 | 0.0005 | 0.16x | 1.00x (baseline) |
+| sa_step_rust | 0.0021 | 0.0003 | 0.06x | **0.34x (2.95x faster)** |
+
+### Interpretation
+
+- Phase 3 (`sa_step_single_flip`) now wins because the bridge uses a symmetry-aware fast path
+  and the Rust step no longer rebuilds the returned state matrix row-by-row.
+- The optimized Rust path is **18.08x faster than pure_python** and **2.95x faster than
+  batch_delta** under the measured workload.
+- The hot case is now dominated by the cheaper symmetric delta kernel; the remaining wins are
+  more likely to come from buffer reuse and larger multi-step batching.
+
+### Reproducing
+
+```bash
+PYTHONPATH=. python tools/bench_phase3.py
+# Override parameters:
+SHOTS=128 DIMS=256 STEPS=5 REPEATS=7 python tools/bench_phase3.py
+```
