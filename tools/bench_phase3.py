@@ -21,6 +21,8 @@ from typing import List, Tuple
 
 import numpy as np
 
+from tytan import _rust_backend
+
 SHOTS = int(os.getenv("SHOTS", "64"))
 DIMS = int(os.getenv("DIMS", "128"))
 STEPS = int(os.getenv("STEPS", "200"))   # SA steps per trial
@@ -74,7 +76,7 @@ def run_pure_python(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
 
 
 def run_batch_delta(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
-                    steps: int, seed: int, rust_mod) -> float:
+                    steps: int, seed: int) -> float:
     """Rust batch_delta + Python acceptance loop (Phase 2 style)."""
     rng = np.random.RandomState(seed)
     states = np.ascontiguousarray(states0.copy(), dtype=np.float64)
@@ -88,7 +90,7 @@ def run_batch_delta(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
         beta = 0.1 + step * (10.0 / max(steps - 1, 1))
         indices_buf[:] = rng.randint(0, dims, size=shots)
         batch = np.asarray(
-            rust_mod.batch_delta(states, q, indices_buf, energies), dtype=np.float64
+            _rust_backend.try_batch_delta(states, q, indices_buf, energies), dtype=np.float64
         )
         for i in range(shots):
             delta = float(batch[i])
@@ -99,7 +101,7 @@ def run_batch_delta(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
 
 
 def run_sa_step_rust(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
-                     steps: int, rng_seed: int, rust_mod) -> float:
+                     steps: int, rng_seed: int) -> float:
     """Rust sa_step_single_flip (Phase 3) — entire per-step inner loop in Rust."""
     states = np.ascontiguousarray(states0.copy(), dtype=np.float64)
     energies = np.ascontiguousarray(energies0.copy(), dtype=np.float64)
@@ -108,7 +110,7 @@ def run_sa_step_rust(q: np.ndarray, states0: np.ndarray, energies0: np.ndarray,
     t0 = time.perf_counter()
     for step in range(steps):
         beta = 0.1 + step * (10.0 / max(steps - 1, 1))
-        next_states_raw, next_energies_raw, stats = rust_mod.sa_step_single_flip(
+        next_states_raw, next_energies_raw, stats = _rust_backend.try_sa_step_single_flip(
             states, energies, q, float(beta), int(rng_state)
         )
         states = np.ascontiguousarray(next_states_raw, dtype=np.float64)
@@ -132,20 +134,8 @@ def main() -> None:
     print(f"shots={SHOTS}  dims={DIMS}  steps={STEPS}  repeats={REPEATS}  seed={SEED}")
     print()
 
-    # Load Rust module
-    try:
-        from tytan._rust_backend import _load_rust_module
-        rust_mod = _load_rust_module()
-    except Exception as exc:
-        rust_mod = None
-        print(f"[warn] Could not load Rust module: {exc}")
-
-    if rust_mod is None:
+    if not _rust_backend.rust_available():
         print("ERROR: Rust module not available — cannot benchmark Phase 3.")
-        return
-
-    if not hasattr(rust_mod, "sa_step_single_flip"):
-        print("ERROR: sa_step_single_flip not present in Rust module.")
         return
 
     # Pre-build problem once; each trial starts from the same initial state.
@@ -160,8 +150,8 @@ def main() -> None:
     for rep in range(REPEATS):
         rep_seed = SEED + rep
         t_py = run_pure_python(q, states0, energies0, STEPS, rep_seed)
-        t_bd = run_batch_delta(q, states0, energies0, STEPS, rep_seed, rust_mod)
-        t_rs = run_sa_step_rust(q, states0, energies0, STEPS, rep_seed + 1, rust_mod)
+        t_bd = run_batch_delta(q, states0, energies0, STEPS, rep_seed)
+        t_rs = run_sa_step_rust(q, states0, energies0, STEPS, rep_seed + 1)
         timings["pure_python"].append(t_py)
         timings["batch_delta"].append(t_bd)
         timings["sa_step_rust"].append(t_rs)

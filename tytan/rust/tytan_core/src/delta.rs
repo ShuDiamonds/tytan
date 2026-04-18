@@ -1,6 +1,28 @@
 use crate::types::{validate_square_matrix, validate_state_len};
 
-fn delta_energy_flipped_bit(state: &[f64], qmatrix_flat: &[f64], n: usize, index: usize) -> f64 {
+fn delta_energy_flipped_bit_symmetric(
+    state: &[f64],
+    qmatrix_flat: &[f64],
+    n: usize,
+    index: usize,
+) -> f64 {
+    let flip = 1.0 - 2.0 * state[index];
+    let row_offset = index * n;
+    let mut row_sum = 0.0_f64;
+
+    for j in 0..n {
+        row_sum += qmatrix_flat[row_offset + j] * state[j];
+    }
+
+    flip * (2.0 * row_sum + qmatrix_flat[row_offset + index] * flip)
+}
+
+fn delta_energy_flipped_bit_general(
+    state: &[f64],
+    qmatrix_flat: &[f64],
+    n: usize,
+    index: usize,
+) -> f64 {
     let flip = 1.0 - 2.0 * state[index];
     let row_offset = index * n;
     let mut cross_term = 0.0_f64;
@@ -12,6 +34,20 @@ fn delta_energy_flipped_bit(state: &[f64], qmatrix_flat: &[f64], n: usize, index
     flip * cross_term + qmatrix_flat[row_offset + index]
 }
 
+fn delta_energy_flipped_bit(
+    state: &[f64],
+    qmatrix_flat: &[f64],
+    n: usize,
+    index: usize,
+    symmetric: bool,
+) -> f64 {
+    if symmetric {
+        delta_energy_flipped_bit_symmetric(state, qmatrix_flat, n, index)
+    } else {
+        delta_energy_flipped_bit_general(state, qmatrix_flat, n, index)
+    }
+}
+
 pub fn delta_energy_impl(
     state: &[f64],
     qmatrix_flat: &[f64],
@@ -19,6 +55,7 @@ pub fn delta_energy_impl(
     ncols: usize,
     index: usize,
     current_energy: Option<f64>,
+    symmetric: bool,
 ) -> Result<f64, &'static str> {
     validate_square_matrix(qmatrix_flat.len(), nrows, ncols)?;
     validate_state_len(state.len(), nrows)?;
@@ -27,7 +64,13 @@ pub fn delta_energy_impl(
     }
 
     let _ = current_energy;
-    Ok(delta_energy_flipped_bit(state, qmatrix_flat, nrows, index))
+    Ok(delta_energy_flipped_bit(
+        state,
+        qmatrix_flat,
+        nrows,
+        index,
+        symmetric,
+    ))
 }
 
 pub fn batch_delta_impl(
@@ -39,6 +82,7 @@ pub fn batch_delta_impl(
     ncols: usize,
     indices: &[usize],
     energies: &[f64],
+    symmetric: bool,
 ) -> Result<Vec<f64>, &'static str> {
     validate_square_matrix(qmatrix_flat.len(), nrows, ncols)?;
     if dims != nrows {
@@ -60,7 +104,7 @@ pub fn batch_delta_impl(
         let start = shot * dims;
         let state = &states_flat[start..start + dims];
         let _ = energies[shot];
-        let delta = delta_energy_flipped_bit(state, qmatrix_flat, nrows, idx);
+        let delta = delta_energy_flipped_bit(state, qmatrix_flat, nrows, idx, symmetric);
         deltas.push(delta);
     }
     Ok(deltas)
@@ -84,7 +128,7 @@ mod tests {
 
         for index in 0..state.len() {
             let expected = brute_delta(&state, &q, 3, index);
-            let actual = delta_energy_impl(&state, &q, 3, 3, index, None).unwrap();
+            let actual = delta_energy_impl(&state, &q, 3, 3, index, None, true).unwrap();
             assert!((actual - expected).abs() < 1e-12);
         }
     }
@@ -99,11 +143,28 @@ mod tests {
         ];
         let indices = [1_usize, 2_usize];
 
-        let batch = batch_delta_impl(&states, 2, 3, &q, 3, 3, &indices, &energies).unwrap();
+        let batch = batch_delta_impl(&states, 2, 3, &q, 3, 3, &indices, &energies, false).unwrap();
         for shot in 0..2 {
             let state = &states[shot * 3..shot * 3 + 3];
             let expected = brute_delta(state, &q, 3, indices[shot]);
             assert!((batch[shot] - expected).abs() < 1e-12);
+        }
+    }
+
+    #[test]
+    fn delta_energy_symmetric_fast_path_matches_bruteforce() {
+        let state = [1.0, 0.0, 1.0, 0.0];
+        let q = [
+            1.0, 0.5, -0.25, 2.0,
+            0.5, 3.0, 1.5, -1.0,
+            -0.25, 1.5, 4.0, 0.75,
+            2.0, -1.0, 0.75, 5.0,
+        ];
+
+        for index in 0..state.len() {
+            let expected = brute_delta(&state, &q, 4, index);
+            let actual = delta_energy_impl(&state, &q, 4, 4, index, None, true).unwrap();
+            assert!((actual - expected).abs() < 1e-12);
         }
     }
 }

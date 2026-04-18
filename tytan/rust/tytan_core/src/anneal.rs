@@ -23,6 +23,7 @@ fn sa_step_once(
     ncols: usize,
     beta: f64,
     rng: &mut u64,
+    symmetric: bool,
 ) -> Result<usize, &'static str> {
     let mut accepted = 0usize;
 
@@ -38,6 +39,7 @@ fn sa_step_once(
             ncols,
             idx,
             Some(next_energies[shot]),
+            symmetric,
         )?;
 
         let accept = if delta <= 0.0 {
@@ -68,6 +70,7 @@ pub fn sa_step_single_flip_impl(
     ncols: usize,
     beta: f64,
     rng_state: u64,
+    symmetric: bool,
 ) -> Result<(Vec<f64>, Vec<f64>, u64, AnnealStats), &'static str> {
     if states_flat.len() != shots * dims {
         return Err("States data size mismatch");
@@ -96,6 +99,7 @@ pub fn sa_step_single_flip_impl(
         ncols,
         beta,
         &mut rng,
+        symmetric,
     )?;
 
     Ok((
@@ -119,6 +123,7 @@ pub fn sa_step_multi_flip_impl(
     ncols: usize,
     betas: &[f64],
     rng_state: u64,
+    symmetric: bool,
 ) -> Result<(Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, u64, AnnealStats), &'static str> {
     if states_flat.len() != shots * dims {
         return Err("States data size mismatch");
@@ -155,6 +160,7 @@ pub fn sa_step_multi_flip_impl(
             ncols,
             beta,
             &mut rng,
+            symmetric,
         )?;
         history_states.extend_from_slice(&next_states);
         history_energies.extend_from_slice(&next_energies);

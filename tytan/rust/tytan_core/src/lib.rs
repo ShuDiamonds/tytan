@@ -8,13 +8,14 @@ mod delta;
 mod reduce;
 mod types;
 
-#[pyfunction(signature = (state, qmatrix, index, current_energy=None))]
+#[pyfunction(signature = (state, qmatrix, index, current_energy=None, symmetric=false))]
 fn delta_energy(
     py: Python<'_>,
     state: PyReadonlyArray1<'_, f64>,
     qmatrix: PyReadonlyArray2<'_, f64>,
     index: usize,
     current_energy: Option<f64>,
+    symmetric: bool,
 ) -> PyResult<f64> {
     let state_view = state.as_array();
     let q_view = qmatrix.as_array();
@@ -36,18 +37,20 @@ fn delta_energy(
             q_shape[1],
             index,
             current_energy,
+            symmetric,
         )
     })
     .map_err(PyValueError::new_err)
 }
 
-#[pyfunction]
+#[pyfunction(signature = (states, qmatrix, indices, energies, symmetric=false))]
 fn batch_delta<'py>(
     py: Python<'py>,
     states: PyReadonlyArray2<'py, f64>,
     qmatrix: PyReadonlyArray2<'py, f64>,
     indices: PyReadonlyArray1<'py, i64>,
     energies: PyReadonlyArray1<'py, f64>,
+    symmetric: bool,
 ) -> PyResult<Bound<'py, PyArray1<f64>>> {
     let s_view = states.as_array();
     let q_view = qmatrix.as_array();
@@ -87,6 +90,7 @@ fn batch_delta<'py>(
                 q_shape[1],
                 &indices_vec,
                 energies_slice,
+                symmetric,
             )
         })
         .map_err(PyValueError::new_err)?;
@@ -138,7 +142,7 @@ fn aggregate_results(
     Ok(rows.into_any().unbind())
 }
 
-#[pyfunction]
+#[pyfunction(signature = (states, energies, qmatrix, beta, rng_state, symmetric=false))]
 fn sa_step_single_flip<'py>(
     py: Python<'py>,
     states: PyReadonlyArray2<'py, f64>,
@@ -146,6 +150,7 @@ fn sa_step_single_flip<'py>(
     qmatrix: PyReadonlyArray2<'py, f64>,
     beta: f64,
     rng_state: u64,
+    symmetric: bool,
 ) -> PyResult<(
     Bound<'py, PyArray2<f64>>,
     Bound<'py, PyArray1<f64>>,
@@ -179,6 +184,7 @@ fn sa_step_single_flip<'py>(
                 q_shape[1],
                 beta,
                 rng_state,
+                symmetric,
             )
         })
         .map_err(PyValueError::new_err)?;
@@ -199,7 +205,7 @@ fn sa_step_single_flip<'py>(
     Ok((states_py, energies_py, stats_dict.into_any().unbind()))
 }
 
-#[pyfunction]
+#[pyfunction(signature = (states, energies, qmatrix, betas, rng_state, symmetric=false))]
 fn sa_step_multi_flip<'py>(
     py: Python<'py>,
     states: PyReadonlyArray2<'py, f64>,
@@ -207,6 +213,7 @@ fn sa_step_multi_flip<'py>(
     qmatrix: PyReadonlyArray2<'py, f64>,
     betas: PyReadonlyArray1<'py, f64>,
     rng_state: u64,
+    symmetric: bool,
 ) -> PyResult<(
     Bound<'py, PyArray1<f64>>,
     Bound<'py, PyArray1<f64>>,
@@ -244,6 +251,7 @@ fn sa_step_multi_flip<'py>(
                 q_shape[1],
                 betas_slice,
                 rng_state,
+                symmetric,
             )
         })
         .map_err(PyValueError::new_err)?;

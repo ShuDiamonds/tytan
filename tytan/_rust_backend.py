@@ -10,6 +10,8 @@ from typing import Optional, Sequence
 
 import numpy as np
 
+_SYMMETRY_CACHE: dict[tuple[int, tuple[int, ...], tuple[int, ...]], bool] = {}
+
 
 def _as_float64_c(array: np.ndarray) -> np.ndarray:
     arr = np.asarray(array)
@@ -23,6 +25,27 @@ def _as_int64_c(array: np.ndarray) -> np.ndarray:
     if arr.dtype == np.int64 and arr.flags.c_contiguous:
         return arr
     return np.ascontiguousarray(arr, dtype=np.int64)
+
+
+def _matrix_cache_key(array: np.ndarray) -> tuple[int, tuple[int, ...], tuple[int, ...]]:
+    return (
+        int(array.__array_interface__["data"][0]),
+        tuple(int(v) for v in array.shape),
+        tuple(int(v) for v in array.strides),
+    )
+
+
+def _is_symmetric_matrix(array: np.ndarray) -> bool:
+    arr = _as_float64_c(array)
+    if arr.ndim != 2 or arr.shape[0] != arr.shape[1]:
+        return False
+    key = _matrix_cache_key(arr)
+    cached = _SYMMETRY_CACHE.get(key)
+    if cached is not None:
+        return cached
+    symmetric = bool(np.array_equal(arr, arr.T))
+    _SYMMETRY_CACHE[key] = symmetric
+    return symmetric
 
 
 def _debug_enabled() -> bool:
@@ -93,7 +116,8 @@ def try_delta_energy(
         return None
     state_f = _as_float64_c(state)
     qmatrix_f = _as_float64_c(qmatrix)
-    return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy))
+    symmetric = _is_symmetric_matrix(qmatrix_f)
+    return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy, symmetric))
 
 
 def try_delta_energy_fast(
@@ -108,7 +132,8 @@ def try_delta_energy_fast(
     """
     if _RUST_MODULE is None:
         return None
-    return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy))
+    symmetric = _is_symmetric_matrix(qmatrix_f)
+    return float(_RUST_MODULE.delta_energy(state_f, qmatrix_f, int(index), current_energy, symmetric))
 
 
 def try_batch_delta(
@@ -123,7 +148,8 @@ def try_batch_delta(
     qmatrix_f = _as_float64_c(qmatrix)
     indices_i = _as_int64_c(indices)
     energies_f = _as_float64_c(energies)
-    return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f), dtype=float)
+    symmetric = _is_symmetric_matrix(qmatrix_f)
+    return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f, symmetric), dtype=float)
 
 
 def try_batch_delta_fast(
@@ -135,7 +161,8 @@ def try_batch_delta_fast(
     """Fast path for pre-normalized batch delta arrays."""
     if _RUST_MODULE is None:
         return None
-    return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f), dtype=float)
+    symmetric = _is_symmetric_matrix(qmatrix_f)
+    return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f, symmetric), dtype=float)
 
 
 def try_aggregate_results(
@@ -173,12 +200,14 @@ def try_sa_step_single_flip(
     states_f = _as_float64_c(states)
     energies_f = _as_float64_c(energies)
     qmatrix_f = _as_float64_c(qmatrix)
+    symmetric = _is_symmetric_matrix(qmatrix_f)
     next_states, next_energies, stats = _RUST_MODULE.sa_step_single_flip(
         states_f,
         energies_f,
         qmatrix_f,
         float(beta),
         int(rng_state),
+        symmetric,
     )
     return (
         _as_float64_c(next_states),
@@ -200,12 +229,14 @@ def try_sa_step_multi_flip(
     energies_f = _as_float64_c(energies)
     qmatrix_f = _as_float64_c(qmatrix)
     betas_f = _as_float64_c(betas)
+    symmetric = _is_symmetric_matrix(qmatrix_f)
     history_states, history_energies, stats = _RUST_MODULE.sa_step_multi_flip(
         states_f,
         energies_f,
         qmatrix_f,
         betas_f,
         int(rng_state),
+        symmetric,
     )
     steps = int(len(betas_f))
     shots = int(states_f.shape[0])

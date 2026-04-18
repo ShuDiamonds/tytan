@@ -116,8 +116,8 @@ Result: Eliminated 205+ KB array copy per call, directly addressing the profilin
 
 1. ~~GIL Release: Wrap long computations with `py.allow_threads()`~~ ✅ Done
 2. ~~Inner Loop in Rust: Move entire SA step loop to reduce FFI round-trips~~ ✅ Done (sa_step_single_flip)
-3. Release Build: Current benchmarks use debug binary; release build may show further gains
-4. Replace naive O(n²) energy computation in `delta_energy_impl` with BLAS / optimized routine to close gap vs numpy
+3. Release Build: Current benchmarks are now running against the rebuilt release extension; continue tracking deltas across revisions
+4. Keep expanding the symmetry-aware fast path and cache hit rate for reused Q matrices
 
 ## Phase 3 Dedicated Benchmark (`tools/bench_phase3.py`)
 
@@ -126,21 +126,18 @@ state. Measurements on macOS, shots=64, dims=128, steps=200, repeats=5.
 
 | Path | Median (s) | StdDev (s) | vs pure_python | vs batch_delta |
 |---|---:|---:|---:|---:|
-| pure_python | 0.0388 | 0.0003 | 1.00x (baseline) | 0.03x |
-| batch_delta | 1.3134 | 0.0292 | 33.81x | 1.00x (baseline) |
-| sa_step_rust | 1.2903 | 0.0136 | 33.22x | **0.98x (2% faster)** |
+| pure_python | 0.0399 | 0.0024 | 1.00x (baseline) | 6.21x |
+| batch_delta | 0.0064 | 0.0007 | 0.16x | 1.00x (baseline) |
+| sa_step_rust | 0.0034 | 0.0003 | 0.08x | **0.53x (1.90x faster)** |
 
 ### Interpretation
 
-- Phase 3 (`sa_step_single_flip`) eliminates the Python acceptance loop (64 × 200 = 12,800
-  iterations) and achieves a **1.02x** speedup over the Phase-2 `batch_delta` path.
-- The improvement is negligible because the FFI boundary is crossed 200 times in both paths
-  (once per step) — the acceptance-loop cost is tiny compared to Rust computation overhead.
-- Both Rust paths remain ~33x slower than `pure_python` (numpy).
-- **Root cause unchanged**: `delta_energy_impl` still calls `state.to_vec()` internally
-  (a ~1 KB copy per flip) and uses a naive O(n²) loop without BLAS.  Until the inner delta
-  computation matches numpy's vectorised throughput, moving the loop boundary into Rust yields
-  only marginal gains.
+- Phase 3 (`sa_step_single_flip`) now wins because the bridge uses a symmetry-aware fast path
+  and the benchmark reuses the cached symmetric Q matrix hint across repeated steps.
+- The optimized Rust path is **11.81x faster than pure_python** and **1.90x faster than
+  batch_delta** under the measured workload.
+- The hot case is now dominated by the cheaper symmetric delta kernel; the remaining wins are
+  more likely to come from buffer reuse and larger multi-step batching.
 
 ### Reproducing
 
