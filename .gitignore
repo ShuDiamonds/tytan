@@ -26,6 +26,7 @@ htmlcov/
 # Project-local temporary outputs
 uv.lock
 diff.txt
+tytan/rust/tytan_core/target/
 
 # Keep docs local-only on this branch
 docs/

@@ -5,15 +5,24 @@ from typing import Optional
 
 import numpy as np
 
+from .. import _rust_backend
+
 
 class DeltaEvaluator:
     """Compute energies and incremental deltas for QUBO states."""
 
     def __init__(self, qmatrix: np.ndarray) -> None:
-        self.qmatrix = np.asarray(qmatrix, dtype=float)
+        self.qmatrix = np.ascontiguousarray(np.asarray(qmatrix, dtype=float))
         if self.qmatrix.ndim != 2 or self.qmatrix.shape[0] != self.qmatrix.shape[1]:
             raise ValueError("QUBO matrix must be square")
         self.size = self.qmatrix.shape[0]
+
+    @staticmethod
+    def _state_fast_view(state: np.ndarray) -> np.ndarray:
+        arr = np.asarray(state)
+        if arr.dtype == np.float64 and arr.flags.c_contiguous:
+            return arr
+        return np.ascontiguousarray(arr, dtype=float)
 
     def evaluate(self, state: np.ndarray) -> float:
         state = np.asarray(state, dtype=float)
@@ -24,7 +33,12 @@ class DeltaEvaluator:
     def delta(self, state: np.ndarray, index: int, energy: Optional[float] = None) -> float:
         """Return change in energy when bit at index is flipped."""
         energy = self.evaluate(state) if energy is None else float(energy)
-        flipped = state.copy().astype(float)
+        state_f = self._state_fast_view(state)
+        rust_delta = _rust_backend.try_delta_energy(state_f, self.qmatrix, index, energy)
+        if rust_delta is not None:
+            return float(rust_delta)
+
+        flipped = state_f.copy()
         if not (0 <= index < self.size):
             raise IndexError("Index out of range")
         flipped[index] = 1.0 - flipped[index]
