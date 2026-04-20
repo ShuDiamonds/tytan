@@ -76,6 +76,8 @@ class AdaptiveBulkSASampler:
             epsilon=epsilon,
             seed=seed,
         )
+        self.strategy_configs = strategy_configs
+        self.epsilon = epsilon
         self.clamp_manager = ClampManager(clamp_mode=clamp_mode)
         self.logger = AnnealLogger()
         self.enable_clamp = enable_clamp
@@ -162,6 +164,43 @@ class AdaptiveBulkSASampler:
         qmatrix_f = np.ascontiguousarray(qmatrix)
         shots = shots or self.shots
         shots = max(1, int(shots))
+        include_diverse = self.include_diverse if include_diverse is None else include_diverse
+        if (
+            self.device == "cpu"
+            and _rust_backend.adaptive_bulk_sa_available()
+            and not self.enable_clamp
+            and all(isinstance(name, str) for name in index_map)
+        ):
+            index_names = [str(name) for name, _ in sorted(index_map.items(), key=lambda item: item[1])]
+            rust_result = _rust_backend.try_adaptive_bulk_sa(
+                qmatrix_f,
+                index_names,
+                shots,
+                self.steps,
+                self.batch_size,
+                self.init_temp,
+                self.end_temp,
+                self.schedule,
+                self.adaptive,
+                self.strategy_configs,
+                self.epsilon if hasattr(self, "epsilon") else 0.2,
+                include_diverse,
+                self.pool_max_entries,
+                self.near_dup_hamming,
+                self.replace_margin,
+                self.stall_steps,
+                self.restart_ratio,
+                self.restart_min_flips,
+                self.restart_burnin_steps,
+                self.restart_diversity_threshold,
+                self.novelty_weight,
+                self.seed,
+            )
+            if rust_result is not None:
+                result, stats = rust_result
+                if return_stats or self.return_stats:
+                    return result, stats
+                return result
         states = self.rng.randint(0, 2, size=(shots, qmatrix_f.shape[0])).astype(float)
         states = np.ascontiguousarray(states)
         evaluator = DeltaEvaluator(qmatrix_f)
@@ -178,7 +217,6 @@ class AdaptiveBulkSASampler:
         best_idx = int(np.argmin(energies))
         best_energy = float(energies[best_idx])
         best_state = states[best_idx].copy()
-        include_diverse = self.include_diverse if include_diverse is None else include_diverse
         last_best_step = 0
         last_restart_step = -self.restart_burnin_steps
         restart_events = 0

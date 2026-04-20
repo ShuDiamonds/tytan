@@ -6,6 +6,9 @@ It provides probe-style helpers that return None when unavailable.
 from __future__ import annotations
 
 import os
+import sys
+from importlib import util as importlib_util
+from pathlib import Path
 from typing import Optional, Sequence
 
 import numpy as np
@@ -92,7 +95,27 @@ def _load_rust_module():
     except Exception:
         if mode == "on":
             raise
-        return None
+        pass
+
+    repo_root = Path(__file__).resolve().parents[1]
+    candidates = [
+        repo_root / "tytan" / "rust" / "tytan_core" / "target" / "debug",
+        repo_root / "tytan" / "rust" / "tytan_core" / "target" / "release",
+    ]
+    for base in candidates:
+        for pattern in ("_tytan_rust*.so", "_tytan_rust*.dylib", "lib_tytan_rust*.so", "lib_tytan_rust*.dylib"):
+            for path in sorted(base.glob(pattern)):
+                spec = importlib_util.spec_from_file_location("_tytan_rust", path)
+                if spec is None or spec.loader is None:
+                    continue
+                module = importlib_util.module_from_spec(spec)
+                sys.modules.setdefault("_tytan_rust", module)
+                spec.loader.exec_module(module)
+                sys.modules.setdefault("tytan._tytan_rust", module)
+                return module
+    if mode == "on":
+        raise ImportError("Rust extension could not be loaded")
+    return None
 
 
 _RUST_MODULE = _load_rust_module()
@@ -104,6 +127,10 @@ if _debug_enabled():
 
 def rust_available() -> bool:
     return _RUST_MODULE is not None
+
+
+def adaptive_bulk_sa_available() -> bool:
+    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "adaptive_bulk_sa")
 
 
 def try_delta_energy(
@@ -170,7 +197,7 @@ def try_aggregate_results(
     energies: np.ndarray,
     variable_names: Sequence[str],
 ):
-    if _RUST_MODULE is None:
+    if not adaptive_bulk_sa_available():
         return None
     states_f = _as_float64_c(states)
     energies_f = _as_float64_c(energies)
@@ -186,6 +213,76 @@ def try_aggregate_results_fast(
     if _RUST_MODULE is None:
         return None
     return _RUST_MODULE.aggregate_results(states_f, energies_f, list(variable_names))
+
+
+def _normalize_strategy_configs(strategy_configs: Optional[Sequence[dict]]) -> Optional[list[tuple[str, str, float]]]:
+    if not strategy_configs:
+        return None
+    normalized: list[tuple[str, str, float]] = []
+    for config in strategy_configs:
+        normalized.append(
+            (
+                str(config.get("name", "linear")),
+                str(config.get("type", "linear")),
+                float(config.get("weight", 1.0)),
+            )
+        )
+    return normalized
+
+
+def try_adaptive_bulk_sa(
+    qmatrix: np.ndarray,
+    index_names: Sequence[str],
+    shots: int,
+    steps: int,
+    batch_size: Optional[int],
+    init_temp: float,
+    end_temp: float,
+    schedule: str,
+    adaptive: bool,
+    strategy_configs: Optional[Sequence[dict]],
+    epsilon: float,
+    include_diverse: bool,
+    pool_max_entries: int,
+    near_dup_hamming: int,
+    replace_margin: float,
+    stall_steps: int,
+    restart_ratio: float,
+    restart_min_flips: int,
+    restart_burnin_steps: int,
+    restart_diversity_threshold: Optional[float],
+    novelty_weight: float,
+    seed: Optional[int],
+):
+    if _RUST_MODULE is None:
+        return None
+    qmatrix_f = _as_float64_c(qmatrix)
+    strategies = _normalize_strategy_configs(strategy_configs)
+    rows, stats = _RUST_MODULE.adaptive_bulk_sa(
+        qmatrix_f,
+        list(index_names),
+        int(shots),
+        int(steps),
+        batch_size,
+        float(init_temp),
+        float(end_temp),
+        str(schedule),
+        bool(adaptive),
+        strategies,
+        float(epsilon),
+        bool(include_diverse),
+        int(pool_max_entries),
+        int(near_dup_hamming),
+        float(replace_margin),
+        int(stall_steps),
+        float(restart_ratio),
+        int(restart_min_flips),
+        int(restart_burnin_steps),
+        restart_diversity_threshold,
+        float(novelty_weight),
+        seed,
+    )
+    return rows, dict(stats)
 
 
 def try_sa_step_single_flip(
