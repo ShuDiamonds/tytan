@@ -47,3 +47,23 @@ def test_adaptive_bulk_sa_can_skip_diverse_results():
     assert isinstance(result, list)
     assert result
     assert stats["best_energy"] is not None
+
+
+def test_adaptive_bulk_sa_triggers_restart_on_stall():
+    qmatrix = [[0.0, 0.0], [0.0, 0.0]]
+    index_map = {0: 0, 1: 1}
+    sampler = AdaptiveBulkSASampler(
+        seed=0,
+        shots=4,
+        steps=4,
+        stall_steps=1,
+        restart_ratio=0.5,
+        restart_min_flips=1,
+        restart_burnin_steps=0,
+        restart_diversity_threshold=100.0,
+        return_stats=True,
+    )
+    _, stats = sampler.run((qmatrix, index_map), return_stats=True)
+    assert stats["restart_count"] >= 1
+    assert "pool_mean_pairwise_distance" in stats
+    assert "state_diversity" in stats
