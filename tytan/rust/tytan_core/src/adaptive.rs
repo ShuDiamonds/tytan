@@ -1,6 +1,7 @@
 use crate::anneal::sa_step_single_flip_impl;
 use crate::pool::{ResultRow, SolutionPoolCore};
 use crate::types::energy_of_state;
+use rayon::prelude::*;
 
 #[derive(Clone)]
 pub enum ScheduleKind {
@@ -131,20 +132,24 @@ fn state_diversity(states_flat: &[f64], shots: usize, dims: usize) -> f64 {
     if shots < 2 {
         return 0.0;
     }
-    let mut total = 0.0_f64;
-    let mut count = 0usize;
-    for i in 0..shots {
-        let a = &states_flat[i * dims..i * dims + dims];
-        for j in (i + 1)..shots {
-            let b = &states_flat[j * dims..j * dims + dims];
-            total += a
-                .iter()
-                .zip(b.iter())
-                .map(|(x, y)| (x - y).abs())
-                .sum::<f64>();
-            count += 1;
-        }
-    }
+    let (total, count) = (0..shots)
+        .into_par_iter()
+        .map(|i| {
+            let a = &states_flat[i * dims..i * dims + dims];
+            let mut local_total = 0.0_f64;
+            let mut local_count = 0usize;
+            for j in (i + 1)..shots {
+                let b = &states_flat[j * dims..j * dims + dims];
+                local_total += a
+                    .iter()
+                    .zip(b.iter())
+                    .map(|(x, y)| (x - y).abs())
+                    .sum::<f64>();
+                local_count += 1;
+            }
+            (local_total, local_count)
+        })
+        .reduce(|| (0.0_f64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
     total / count.max(1) as f64
 }
 
@@ -158,6 +163,7 @@ fn init_states(shots: usize, dims: usize, rng: &mut u64) -> Vec<f64> {
 
 fn init_energies(states_flat: &[f64], shots: usize, dims: usize, qmatrix_flat: &[f64]) -> Vec<f64> {
     (0..shots)
+        .into_par_iter()
         .map(|shot| {
             let state = &states_flat[shot * dims..shot * dims + dims];
             energy_of_state(state, qmatrix_flat, dims)

@@ -100,7 +100,9 @@ def _load_rust_module():
     repo_root = Path(__file__).resolve().parents[1]
     candidates = [
         repo_root / "tytan" / "rust" / "tytan_core" / "target" / "debug",
+        repo_root / "tytan" / "rust" / "tytan_core" / "target" / "debug" / "deps",
         repo_root / "tytan" / "rust" / "tytan_core" / "target" / "release",
+        repo_root / "tytan" / "rust" / "tytan_core" / "target" / "release" / "deps",
     ]
     for base in candidates:
         for pattern in ("_tytan_rust*.so", "_tytan_rust*.dylib", "lib_tytan_rust*.so", "lib_tytan_rust*.dylib"):

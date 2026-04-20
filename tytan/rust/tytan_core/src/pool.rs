@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use rayon::prelude::*;
+
 #[derive(Clone)]
 pub struct PoolEntry {
     pub state: Vec<i64>,
@@ -63,7 +65,7 @@ impl SolutionPoolCore {
 
     fn nearest_entry(&self, state: &[i64]) -> Option<(Vec<i64>, usize)> {
         self.entries
-            .iter()
+            .par_iter()
             .map(|(key, entry)| (key.clone(), Self::state_distance(state, entry)))
             .min_by_key(|(_, dist)| *dist)
     }
@@ -142,8 +144,8 @@ impl SolutionPoolCore {
         }
         let state_i64 = Self::key(state);
         self.entries
-            .values()
-            .map(|entry| Self::hamming(&state_i64, &entry.state))
+            .par_iter()
+            .map(|(_, entry)| Self::hamming(&state_i64, &entry.state))
             .min()
             .unwrap_or(0) as f64
     }
@@ -153,20 +155,24 @@ impl SolutionPoolCore {
         if entries.len() < 2 {
             return 0.0;
         }
-        let mut total = 0.0_f64;
-        let mut count = 0_usize;
-        for i in 0..entries.len() {
-            for j in (i + 1)..entries.len() {
-                total += Self::hamming(&entries[i].state, &entries[j].state) as f64;
-                count += 1;
-            }
-        }
+        let (total, count) = (0..entries.len())
+            .into_par_iter()
+            .map(|i| {
+                let mut local_total = 0.0_f64;
+                let mut local_count = 0usize;
+                for j in (i + 1)..entries.len() {
+                    local_total += Self::hamming(&entries[i].state, &entries[j].state) as f64;
+                    local_count += 1;
+                }
+                (local_total, local_count)
+            })
+            .reduce(|| (0.0_f64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
         total / count.max(1) as f64
     }
 
     fn refresh_best(&mut self) {
         let mut entries: Vec<PoolEntry> = self.entries.values().cloned().collect();
-        entries.sort_by(|a, b| {
+        entries.par_sort_by(|a, b| {
             a.energy
                 .partial_cmp(&b.energy)
                 .unwrap_or(std::cmp::Ordering::Equal)
@@ -194,7 +200,7 @@ impl SolutionPoolCore {
         let mut diverse = Vec::new();
         while !candidates.is_empty() && diverse.len() < self.diverse_k {
             let (best_idx, _) = candidates
-                .iter()
+                .par_iter()
                 .enumerate()
                 .map(|(idx, entry)| {
                     let min_dist = if selected.is_empty() {
