@@ -1,5 +1,6 @@
 from tytan import Compile, symbols
 from tytan.adaptive_sa import AdaptiveBulkSASampler
+from tytan import _rust_backend as rb
 
 
 def test_adaptive_bulk_sa_produces_results_and_stats():
@@ -67,3 +68,24 @@ def test_adaptive_bulk_sa_triggers_restart_on_stall():
     assert stats["restart_count"] >= 1
     assert "pool_mean_pairwise_distance" in stats
     assert "state_diversity" in stats
+
+
+def test_adaptive_bulk_sa_uses_rust_fast_path(monkeypatch):
+    x, y = symbols("x y")
+    qubo, _ = Compile((x + y - 1) ** 2).get_qubo()
+
+    called = {"rust": 0}
+
+    def fake_rust_core(*args, **kwargs):
+        called["rust"] += 1
+        return [[{"x": 1, "y": 0}, -1.0, 1]], {"best_energy": -1.0, "strategy_weights": {}, "log_entries": [], "restart_count": 0}
+
+    monkeypatch.setattr(rb, "adaptive_bulk_sa_available", lambda: True)
+    monkeypatch.setattr(rb, "try_adaptive_bulk_sa", fake_rust_core)
+
+    sampler = AdaptiveBulkSASampler(seed=0, shots=2, steps=2, enable_clamp=False, return_stats=True)
+    result, stats = sampler.run(qubo, return_stats=True)
+
+    assert called["rust"] == 1
+    assert result[0][0]["x"] == 1
+    assert stats["best_energy"] == -1.0
