@@ -91,7 +91,14 @@ fn choose_index(weights: &[f64], rng: &mut u64, epsilon: f64) -> usize {
     best
 }
 
-fn schedule_temperature(step: usize, steps: usize, init_temp: f64, end_temp: f64, schedule: &ScheduleKind, strategy_kind: &str) -> f64 {
+fn schedule_temperature(
+    step: usize,
+    steps: usize,
+    init_temp: f64,
+    end_temp: f64,
+    schedule: &ScheduleKind,
+    strategy_kind: &str,
+) -> f64 {
     let progress = step as f64 / (steps.saturating_sub(1).max(1) as f64);
     match schedule {
         ScheduleKind::Exponential if strategy_kind == "exponential" => {
@@ -270,7 +277,10 @@ pub fn run_adaptive_bulk_sa_impl(
     let strategies = strategies
         .map(|items| items.to_vec())
         .unwrap_or_else(build_default_strategies);
-    let mut strategy_weights: Vec<f64> = strategies.iter().map(|spec| spec.weight.max(1e-3)).collect();
+    let mut strategy_weights: Vec<f64> = strategies
+        .iter()
+        .map(|spec| spec.weight.max(1e-3))
+        .collect();
     let mut log_entries = Vec::with_capacity(config.steps);
     let mut restart_count = 0usize;
     let mut last_best_step = 0usize;

@@ -6,8 +6,9 @@ use pyo3::types::{PyDict, PyList};
 mod adaptive;
 mod anneal;
 mod delta;
-mod reduce;
 mod pool;
+mod presolve;
+mod reduce;
 mod types;
 
 #[pyfunction(signature = (state, qmatrix, index, current_energy=None, symmetric=false))]
@@ -142,6 +143,94 @@ fn aggregate_results(
         rows.append(row)?;
     }
     Ok(rows.into_any().unbind())
+}
+
+#[pyfunction(signature = (
+    qmatrix,
+    hard_threshold = 1.5,
+    soft_threshold = 1.0,
+    coupling_threshold = 0.2,
+    aggregation_threshold = 0.8,
+    weak_cut_threshold = 0.1,
+    probing_budget = 64,
+    pool_frequency = None,
+    pair_correlation = None
+))]
+fn presolve_plan<'py>(
+    py: Python<'py>,
+    qmatrix: PyReadonlyArray2<'py, f64>,
+    hard_threshold: f64,
+    soft_threshold: f64,
+    coupling_threshold: f64,
+    aggregation_threshold: f64,
+    weak_cut_threshold: f64,
+    probing_budget: usize,
+    pool_frequency: Option<PyReadonlyArray1<'py, f64>>,
+    pair_correlation: Option<PyReadonlyArray2<'py, f64>>,
+) -> PyResult<PyObject> {
+    let q_view = qmatrix.as_array();
+    let q_shape = q_view.shape();
+    let q_slice = q_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("Q matrix must be C-contiguous"))?;
+    let pool_frequency_owned = match pool_frequency {
+        Some(freq) => Some(freq.as_array().iter().copied().collect::<Vec<f64>>()),
+        None => None,
+    };
+    let pair_correlation_owned = match pair_correlation {
+        Some(corr) => Some(corr.as_array().iter().copied().collect::<Vec<f64>>()),
+        None => None,
+    };
+
+    let output = py
+        .allow_threads(|| {
+            presolve::presolve_plan_impl(
+                q_slice,
+                q_shape[0],
+                hard_threshold,
+                soft_threshold,
+                coupling_threshold,
+                aggregation_threshold,
+                weak_cut_threshold,
+                probing_budget,
+                pool_frequency_owned.as_deref(),
+                pair_correlation_owned.as_deref(),
+            )
+        })
+        .map_err(PyValueError::new_err)?;
+
+    let result = PyDict::new_bound(py);
+    let reduced_array = Array2::from_shape_vec(
+        (output.reduced_dim, output.reduced_dim),
+        output.reduced_matrix,
+    )
+    .map_err(|_| PyValueError::new_err("Failed to build reduced matrix"))?;
+    result.set_item(
+        "reduced_matrix",
+        PyArray2::from_owned_array_bound(py, reduced_array),
+    )?;
+    result.set_item("active_indices", output.active_indices)?;
+    result.set_item("hard_fixed_indices", output.hard_fixed_indices)?;
+    result.set_item("hard_fixed_values", output.hard_fixed_values)?;
+    result.set_item("soft_fixed_indices", output.soft_fixed_indices)?;
+    result.set_item("fix_confidence", output.fix_confidence)?;
+    result.set_item("aggregation_src", output.aggregation_src)?;
+    result.set_item("aggregation_dst", output.aggregation_dst)?;
+    result.set_item("aggregation_relation", output.aggregation_relation)?;
+    result.set_item("aggregation_strength", output.aggregation_strength)?;
+    result.set_item("component_ids", output.component_ids.clone())?;
+    result.set_item("block_membership", output.component_ids)?;
+    result.set_item("boundary_indices", output.boundary_indices)?;
+    result.set_item("frontier_indices", output.frontier_indices)?;
+    result.set_item("branch_candidate_indices", output.branch_candidate_indices)?;
+    result.set_item("branch_candidate_scores", output.branch_candidate_scores)?;
+
+    let stats = PyDict::new_bound(py);
+    for (key, value) in output.stats {
+        stats.set_item(key, value)?;
+    }
+    result.set_item("stats", stats)?;
+    Ok(result.into_any().unbind())
 }
 
 #[pyfunction(signature = (states, energies, qmatrix, beta, rng_state, symmetric=false))]
@@ -335,7 +424,11 @@ fn adaptive_bulk_sa<'py>(
     let schedule_kind = match schedule.to_ascii_lowercase().as_str() {
         "linear" => adaptive::ScheduleKind::Linear,
         "exponential" => adaptive::ScheduleKind::Exponential,
-        _ => return Err(PyValueError::new_err("schedule must be linear or exponential")),
+        _ => {
+            return Err(PyValueError::new_err(
+                "schedule must be linear or exponential",
+            ))
+        }
     };
     let strategies = strategies.map(|items| {
         items
@@ -366,7 +459,13 @@ fn adaptive_bulk_sa<'py>(
     };
     let output = py
         .allow_threads(|| {
-            adaptive::run_adaptive_bulk_sa_impl(q_slice, q_shape[0], &index_names, &config, strategies.as_deref())
+            adaptive::run_adaptive_bulk_sa_impl(
+                q_slice,
+                q_shape[0],
+                &index_names,
+                &config,
+                strategies.as_deref(),
+            )
         })
         .map_err(PyValueError::new_err)?;
 
@@ -418,6 +517,7 @@ fn _tytan_rust(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(delta_energy, m)?)?;
     m.add_function(wrap_pyfunction!(batch_delta, m)?)?;
     m.add_function(wrap_pyfunction!(aggregate_results, m)?)?;
+    m.add_function(wrap_pyfunction!(presolve_plan, m)?)?;
     m.add_function(wrap_pyfunction!(sa_step_single_flip, m)?)?;
     m.add_function(wrap_pyfunction!(sa_step_multi_flip, m)?)?;
     m.add_function(wrap_pyfunction!(adaptive_bulk_sa, m)?)?;

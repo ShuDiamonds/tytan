@@ -231,8 +231,10 @@ mod tests {
         let states = vec![0.0, 1.0, 1.0, 0.0];
         let energies = vec![0.0, 0.0];
         let q = vec![0.0, -1.0, -1.0, 0.0];
-        let first = sa_step_single_flip_impl(&states, 2, 2, &energies, &q, 2, 2, 1.0, 1, true).unwrap();
-        let second = sa_step_single_flip_impl(&states, 2, 2, &energies, &q, 2, 2, 1.0, 1, true).unwrap();
+        let first =
+            sa_step_single_flip_impl(&states, 2, 2, &energies, &q, 2, 2, 1.0, 1, true).unwrap();
+        let second =
+            sa_step_single_flip_impl(&states, 2, 2, &energies, &q, 2, 2, 1.0, 1, true).unwrap();
         assert_eq!(first.0, second.0);
         assert_eq!(first.1, second.1);
         assert_eq!(first.2, second.2);

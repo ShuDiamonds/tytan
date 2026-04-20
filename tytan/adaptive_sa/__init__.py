@@ -4,6 +4,7 @@ from .adaptive_bulk_sa import AdaptiveBulkSASampler
 from .anneal_logger import AnnealLogger
 from .clamp_manager import ClampManager
 from .delta_evaluator import DeltaEvaluator
+from .mip_presolved_adaptive_bulk_sa import MIPPresolvedAdaptiveBulkSASampler
 from .numeric_normalizer import NumericNormalizer
 from .presolve_reducer import PresolveReducer
 from .presolved_adaptive_bulk_sa import PresolvedAdaptiveBulkSASampler
@@ -18,6 +19,7 @@ __all__ = [
     "AnnealLogger",
     "ClampManager",
     "DeltaEvaluator",
+    "MIPPresolvedAdaptiveBulkSASampler",
     "NumericNormalizer",
     "PresolveReducer",
     "PresolvedAdaptiveBulkSASampler",

@@ -75,3 +75,9 @@ def test_try_sa_step_multi_flip_returns_none_without_module(monkeypatch):
     q = np.array([[0.0, -1.0], [-1.0, 0.0]], dtype=float)
     betas = np.array([1.0, 0.5], dtype=float)
     assert rb.try_sa_step_multi_flip(states, energies, q, betas, rng_state=1) is None
+
+
+def test_try_mip_presolve_plan_returns_none_without_module(monkeypatch):
+    monkeypatch.setattr(rb, "_RUST_MODULE", None)
+    qmatrix = np.zeros((2, 2), dtype=float)
+    assert rb.try_mip_presolve_plan(qmatrix) is None

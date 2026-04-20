@@ -135,6 +135,10 @@ def adaptive_bulk_sa_available() -> bool:
     return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "adaptive_bulk_sa")
 
 
+def mip_presolve_available() -> bool:
+    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "presolve_plan")
+
+
 def try_delta_energy(
     state: np.ndarray,
     qmatrix: np.ndarray,
@@ -285,6 +289,37 @@ def try_adaptive_bulk_sa(
         seed,
     )
     return rows, dict(stats)
+
+
+def try_mip_presolve_plan(
+    qmatrix: np.ndarray,
+    hard_threshold: float = 1.5,
+    soft_threshold: float = 1.0,
+    coupling_threshold: float = 0.2,
+    aggregation_threshold: float = 0.8,
+    weak_cut_threshold: float = 0.1,
+    probing_budget: int = 64,
+    pool_frequency: Optional[np.ndarray] = None,
+    pair_correlation: Optional[np.ndarray] = None,
+):
+    if not mip_presolve_available():
+        return None
+    qmatrix_f = _as_float64_c(qmatrix)
+    pool_frequency_f = None if pool_frequency is None else _as_float64_c(pool_frequency)
+    pair_correlation_f = None if pair_correlation is None else _as_float64_c(pair_correlation)
+    return dict(
+        _RUST_MODULE.presolve_plan(
+            qmatrix_f,
+            float(hard_threshold),
+            float(soft_threshold),
+            float(coupling_threshold),
+            float(aggregation_threshold),
+            float(weak_cut_threshold),
+            int(probing_budget),
+            pool_frequency_f,
+            pair_correlation_f,
+        )
+    )
 
 
 def try_sa_step_single_flip(

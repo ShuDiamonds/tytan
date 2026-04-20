@@ -190,7 +190,8 @@ impl SolutionPoolCore {
         }
 
         let mut selected = self.best.clone();
-        let mut selected_keys: Vec<Vec<i64>> = selected.iter().map(|entry| entry.state.clone()).collect();
+        let mut selected_keys: Vec<Vec<i64>> =
+            selected.iter().map(|entry| entry.state.clone()).collect();
         let mut candidates: Vec<PoolEntry> = self
             .entries
             .values()
