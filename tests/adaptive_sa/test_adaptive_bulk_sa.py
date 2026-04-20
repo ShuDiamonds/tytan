@@ -31,3 +31,19 @@ def test_adaptive_bulk_sa_clamp_mode_reflected():
     sampler = AdaptiveBulkSASampler(seed=0, shots=3, steps=4, enable_clamp=True, clamp_mode="hard", return_stats=True)
     _, stats = sampler.run(qubo, return_stats=True)
     assert stats["clamp_mode"] == "hard"
+
+
+def test_adaptive_bulk_sa_can_skip_diverse_results():
+    x, y, z = symbols("x y z")
+    qubo, _ = Compile((x + y + z - 1) ** 2).get_qubo()
+    sampler = AdaptiveBulkSASampler(
+        seed=0,
+        shots=4,
+        steps=8,
+        include_diverse=False,
+        return_stats=True,
+    )
+    result, stats = sampler.run(qubo, return_stats=True, include_diverse=False)
+    assert isinstance(result, list)
+    assert result
+    assert stats["best_energy"] is not None

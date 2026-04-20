@@ -33,6 +33,7 @@ class AdaptiveBulkSASampler:
         clamp_mode: str = "soft",
         return_stats: bool = False,
         device: str = "cpu",
+        include_diverse: bool = True,
     ) -> None:
         if shots < 1 or steps < 1:
             raise ValueError("shots and steps must be positive")
@@ -54,6 +55,7 @@ class AdaptiveBulkSASampler:
         self.enable_clamp = enable_clamp
         self.return_stats = return_stats
         self.device = device
+        self.include_diverse = include_diverse
         self.rng = np.random.RandomState(self.seed)
 
     def _temperature(self, step: int, strategy_type: str) -> float:
@@ -80,6 +82,7 @@ class AdaptiveBulkSASampler:
         qubomix: Tuple[np.ndarray, Dict[str, int]],
         shots: Optional[int] = None,
         return_stats: Optional[bool] = None,
+        include_diverse: Optional[bool] = None,
     ):  # pragma: no cover - wrapping ensures compatibility
         qmatrix, index_map = qubomix
         if qmatrix.ndim != 2:
@@ -97,6 +100,7 @@ class AdaptiveBulkSASampler:
         best_idx = int(np.argmin(energies))
         best_energy = float(energies[best_idx])
         best_state = states[best_idx].copy()
+        include_diverse = self.include_diverse if include_diverse is None else include_diverse
 
         if (
             not self.adaptive
@@ -153,7 +157,7 @@ class AdaptiveBulkSASampler:
                 energies = np.ascontiguousarray(history_energies[-1], dtype=float)
                 rust_rng_state = int(step_stats.get("rng_state", rust_rng_state))
                 pool.offer(best_state, best_energy)
-                result = pool.to_results(index_map)
+                result = pool.to_results(index_map, include_diverse=include_diverse)
                 stats = {
                     "best_energy": best_energy,
                     "strategy_weights": self.strategy_manager.weights,
@@ -245,7 +249,7 @@ class AdaptiveBulkSASampler:
                 }
                 self.clamp_manager.update_scores(occupancy)
         pool.offer(best_state, best_energy)
-        result = pool.to_results(index_map)
+        result = pool.to_results(index_map, include_diverse=include_diverse)
         stats = {
             "best_energy": best_energy,
             "strategy_weights": self.strategy_manager.weights,

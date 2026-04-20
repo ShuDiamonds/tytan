@@ -31,6 +31,7 @@ class PresolvedAdaptiveBulkSASampler:
         enable_clamp: bool = False,
         clamp_mode: str = "soft",
         device: str = "cpu",
+        include_diverse: bool = True,
         presolve: bool = True,
         presolve_strength: str = "medium",
         enable_soft_fix: bool = True,
@@ -56,6 +57,7 @@ class PresolvedAdaptiveBulkSASampler:
             enable_clamp=enable_clamp,
             clamp_mode=clamp_mode,
             device=device,
+            include_diverse=include_diverse,
         )
         self.numeric_normalizer = NumericNormalizer(
             small_coeff_threshold=small_coeff_threshold,
@@ -98,6 +100,7 @@ class PresolvedAdaptiveBulkSASampler:
         qubomix: Tuple[np.ndarray, Dict[str, int]],
         shots: Optional[int] = None,
         return_stats: Optional[bool] = None,
+        include_diverse: Optional[bool] = None,
     ):  # pragma: no cover
         qmatrix, index_map = qubomix
         normalized_matrix, normalization_info = self._normalize(np.asarray(qmatrix, dtype=float))
@@ -113,7 +116,7 @@ class PresolvedAdaptiveBulkSASampler:
             reduced_matrix = normalized_matrix
             presolve_stats = self._default_presolve_stats(len(index_map))
         reduced_results, reduced_stats = self._run_reduced(
-            reduced_matrix, mapper, shots
+            reduced_matrix, mapper, shots, include_diverse
         )
         restored_results = mapper.restore_results(reduced_results)
         restore_energy_check = self._evaluate_restored(restored_results, qmatrix, mapper)
@@ -140,6 +143,7 @@ class PresolvedAdaptiveBulkSASampler:
         reduced_matrix: np.ndarray,
         mapper: ReducedQuboMapper,
         shots: Optional[int],
+        include_diverse: Optional[bool],
     ) -> Tuple[List[List[object]], Dict[str, object]]:
         if not mapper.reduced_index_map:
             return [[{}, 0.0, 1]], {
@@ -153,6 +157,7 @@ class PresolvedAdaptiveBulkSASampler:
             (reduced_matrix, mapper.reduced_index_map),
             shots=solver_shots,
             return_stats=True,
+            include_diverse=include_diverse,
         )
         return reduced_result, reduced_stats
 
