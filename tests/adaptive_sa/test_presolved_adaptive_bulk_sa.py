@@ -42,3 +42,23 @@ def test_presolved_sampler_reports_stats_and_restores_with_hard_fix():
     for check in stats["restore_energy_check"]:
         assert isinstance(check["restored_energy"], float)
         assert isinstance(check["reported_energy"], float)
+
+
+def test_presolved_sampler_accepts_diversity_and_restart_controls():
+    qmatrix = [[0.0, 0.0], [0.0, 0.0]]
+    index_map = {"x": 0, "y": 1}
+    sampler = PresolvedAdaptiveBulkSASampler(
+        seed=0,
+        shots=4,
+        steps=4,
+        include_diverse=False,
+        stall_steps=1,
+        restart_ratio=0.5,
+        restart_min_flips=1,
+        restart_burnin_steps=0,
+        restart_diversity_threshold=100.0,
+        return_stats=True,
+    )
+    result, stats = sampler.run((qmatrix, index_map), return_stats=True, include_diverse=False)
+    assert result
+    assert stats["reduced_solve_stats"]["restart_count"] >= 1

@@ -60,6 +60,19 @@ def test_try_aggregate_returns_none_without_module(monkeypatch):
     assert rb.try_aggregate_results(states, energies, ["x", "y"]) is None
 
 
+def test_try_aggregate_uses_symbol_even_without_adaptive_path(monkeypatch):
+    class FakeModule:
+        def aggregate_results(self, states, energies, names):
+            assert list(names) == ["x", "y"]
+            return [[{"x": 1, "y": 0}, -1.0, 2]]
+
+    monkeypatch.setattr(rb, "_RUST_MODULE", FakeModule())
+    states = np.array([[1.0, 0.0], [1.0, 0.0]], dtype=float)
+    energies = np.array([0.0, 0.0], dtype=float)
+    rows = rb.try_aggregate_results(states, energies, ["x", "y"])
+    assert rows == [[{"x": 1, "y": 0}, -1.0, 2]]
+
+
 def test_try_sa_step_single_flip_returns_none_without_module(monkeypatch):
     monkeypatch.setattr(rb, "_RUST_MODULE", None)
     states = np.array([[1.0, 0.0], [0.0, 1.0]], dtype=float)
@@ -75,3 +88,9 @@ def test_try_sa_step_multi_flip_returns_none_without_module(monkeypatch):
     q = np.array([[0.0, -1.0], [-1.0, 0.0]], dtype=float)
     betas = np.array([1.0, 0.5], dtype=float)
     assert rb.try_sa_step_multi_flip(states, energies, q, betas, rng_state=1) is None
+
+
+def test_try_mip_presolve_plan_returns_none_without_module(monkeypatch):
+    monkeypatch.setattr(rb, "_RUST_MODULE", None)
+    qmatrix = np.zeros((2, 2), dtype=float)
+    assert rb.try_mip_presolve_plan(qmatrix) is None
