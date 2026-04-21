@@ -203,7 +203,7 @@ def try_aggregate_results(
     energies: np.ndarray,
     variable_names: Sequence[str],
 ):
-    if not adaptive_bulk_sa_available():
+    if _RUST_MODULE is None or not hasattr(_RUST_MODULE, "aggregate_results"):
         return None
     states_f = _as_float64_c(states)
     energies_f = _as_float64_c(energies)

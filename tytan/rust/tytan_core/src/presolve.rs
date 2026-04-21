@@ -325,4 +325,133 @@ mod tests {
         assert_eq!(plan.aggregation_src, vec![0]);
         assert_eq!(plan.aggregation_dst, vec![1]);
     }
+
+    #[test]
+    fn pool_frequency_changes_fix_confidence() {
+        let q = vec![
+            0.5, 0.2, //
+            0.2, 0.5,
+        ];
+        let no_pool = presolve_plan_impl(&q, 2, 10.0, 5.0, 1.0, 1.0, 0.1, 2, None, None)
+            .expect("plan");
+        let stable_pool = vec![0.5, 0.5];
+        let unstable_pool = vec![0.0, 1.0];
+        let stable = presolve_plan_impl(&q, 2, 10.0, 5.0, 1.0, 1.0, 0.1, 2, Some(&stable_pool), None)
+            .expect("plan");
+        let unstable = presolve_plan_impl(
+            &q,
+            2,
+            10.0,
+            5.0,
+            1.0,
+            1.0,
+            0.1,
+            2,
+            Some(&unstable_pool),
+            None,
+        )
+        .expect("plan");
+        assert!(stable.fix_confidence[0] > unstable.fix_confidence[0]);
+        assert!(stable.fix_confidence[0] > no_pool.fix_confidence[0]);
+    }
+
+    #[test]
+    fn weak_cut_and_probing_budget_are_respected() {
+        let q = vec![
+            0.0, 0.05, 0.2, //
+            0.05, 0.0, 0.05, //
+            0.2, 0.05, 0.0,
+        ];
+        let plan = presolve_plan_impl(&q, 3, 10.0, 5.0, 1.0, 0.1, 0.1, 1, None, None)
+            .expect("plan");
+        assert_eq!(plan.boundary_indices, vec![0, 2]);
+        assert_eq!(plan.frontier_indices.len(), 2);
+        assert_eq!(plan.branch_candidate_indices.len(), 1);
+        assert_eq!(plan.branch_candidate_scores.len(), 1);
+    }
+
+    #[test]
+    fn pairwise_presolve_cases_cover_factor_combinations() {
+        let q = vec![
+            -1.2, 0.6, 0.0, 0.0, //
+            0.6, -0.3, 0.0, 0.0, //
+            0.0, 0.0, -1.2, 0.6, //
+            0.0, 0.0, 0.6, -0.3,
+        ];
+        let stable_freq = vec![0.5, 0.5, 0.5, 0.5];
+        let unstable_freq = vec![0.0, 1.0, 0.0, 1.0];
+        let pair_corr = vec![
+            0.0, 0.95, 0.0, 0.0, //
+            0.95, 0.0, 0.0, 0.0, //
+            0.0, 0.0, 0.0, 0.95, //
+            0.0, 0.0, 0.95, 0.0,
+        ];
+
+        let cases = [
+            ("PF-01", "none", "strict", "small", 1.0, 0.4, 1, 2, 0, 0.7),
+            ("PF-02", "stable", "strict", "large", 1.0, 0.4, 4, 2, 0, 1.0),
+            ("PF-03", "pair", "loose", "small", 3.0, 0.4, 1, 0, 2, 0.7),
+            ("PF-04", "none", "loose", "large", 3.0, 0.4, 4, 0, 0, 0.7),
+            ("PF-05", "stable", "loose", "small", 3.0, 0.4, 1, 0, 0, 1.0),
+            ("PF-06", "pair", "strict", "large", 1.0, 0.4, 4, 2, 2, 0.7),
+        ];
+
+        for (
+            case_id,
+            pool_mode,
+            threshold_mode,
+            budget_mode,
+            hard_threshold,
+            soft_threshold,
+            probing_budget,
+            expected_hard_fix_count,
+            expected_aggregation_count,
+            expected_confidence,
+        ) in cases
+        {
+            let pool_frequency = match pool_mode {
+                "none" => None,
+                "stable" => Some(stable_freq.as_slice()),
+                "pair" => Some(unstable_freq.as_slice()),
+                _ => unreachable!(),
+            };
+            let plan = presolve_plan_impl(
+                &q,
+                4,
+                hard_threshold,
+                soft_threshold,
+                1.0,
+                0.8,
+                0.1,
+                probing_budget,
+                pool_frequency,
+                if pool_mode == "pair" {
+                    Some(pair_corr.as_slice())
+                } else {
+                    None
+                },
+            )
+            .unwrap_or_else(|_| panic!("case {case_id} failed"));
+
+            assert_eq!(
+                plan.hard_fixed_indices.len(),
+                expected_hard_fix_count,
+                "case {case_id}: {pool_mode}/{threshold_mode}/{budget_mode}"
+            );
+            assert_eq!(
+                plan.aggregation_src.len(),
+                expected_aggregation_count,
+                "case {case_id}: {pool_mode}/{threshold_mode}/{budget_mode}"
+            );
+            assert_eq!(
+                plan.branch_candidate_indices.len(),
+                probing_budget.min(4),
+                "case {case_id}: {pool_mode}/{threshold_mode}/{budget_mode}"
+            );
+            assert!(
+                (plan.fix_confidence[0] - expected_confidence).abs() < 1e-9,
+                "case {case_id}: {pool_mode}/{threshold_mode}/{budget_mode}"
+            );
+        }
+    }
 }
