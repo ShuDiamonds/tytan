@@ -1,0 +1,4821 @@
+{
+  "meta": {
+    "density": 0.01,
+    "device_requested": "mps:0",
+    "device_selected": "mps:0",
+    "dims": [
+      256,
+      512,
+      1024
+    ],
+    "disable_rust": true,
+    "pool_offer_mode": "phase_end",
+    "repeats": 5,
+    "seed": 42,
+    "shots": 64,
+    "steps": 128,
+    "warmup": 2
+  },
+  "runs": [
+    {
+      "cases": [
+        {
+          "best_energy_median": -136.61339238360938,
+          "last_stats": {
+            "best_energy": -136.61339238360938,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 49,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 57,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 55,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 56,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 53,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 57,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 52,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 55,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 59,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 49,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 51,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 51,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 51,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 51,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 55,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 53,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 54,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 47,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 49,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 50,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 52,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 51,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 57,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 55,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 49,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 46,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 53,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 48,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 51,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 54,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 54,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 53,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 43,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 50,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 50,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 53,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 50,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 48,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 46,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 52,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 51,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 47,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 47,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 44,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 44,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 49,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 47,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 53,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 52,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 53,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 49,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 46,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 49,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 49,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 38,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 43,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 50,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 45,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 43,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 43,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 50,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 49,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 43,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 45,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 27,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 47,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 46,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 45,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 38,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 44,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 49,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 34,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 41,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 47,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 47,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 44,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 39,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 42,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 44,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 44,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 37,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 27,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 42,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 44,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 34,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 40,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 38,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 38,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 40,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 38,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 38,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 37,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 33,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 37,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 38,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 38,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 40,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 41,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 40,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 33,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 38,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 35,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 30,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 24,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 37,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 24,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 41,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 34,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 36,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 30,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 25,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 40,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 23,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 22,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 25,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 26,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 32,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 31,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 32,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 32,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 27,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 36,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 26,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 26,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 27,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 30,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 25,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 22,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase2_enabled": false,
+            "phase2_improvements": 0,
+            "phase2_start_step": 128,
+            "pool_mean_pairwise_distance": 119.83193897637796,
+            "restart_count": 0,
+            "state_diversity": 122.07837301587301,
+            "strategy_weights": {
+              "exponential": 1227.8015312243406,
+              "linear": 14822.504449103832
+            }
+          },
+          "mean_sec": 2.997715733619407,
+          "median_sec": 3.012464459054172,
+          "name": "cpu_baseline",
+          "timings_sec": [
+            3.038987083011307,
+            3.012464459054172,
+            2.958132292027585,
+            2.9536485000280663,
+            3.0253463339759037
+          ]
+        },
+        {
+          "best_energy_median": -126.4834467569677,
+          "last_stats": {
+            "best_energy": -122.063692263241,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 48,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 47,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 57,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 55,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 54,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 54,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 54,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 57,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 52,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 44,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 53,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 54,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 45,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 49,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 52,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 58,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 58,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 55,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 45,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 55,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 54,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 43,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 55,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 50,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 47,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 55,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 53,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 50,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 51,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 45,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 52,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 52,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 38,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 50,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 44,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 55,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 51,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 47,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 51,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 49,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 57,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 54,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 52,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 48,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 44,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 45,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 48,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 53,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 43,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 42,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 46,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 40,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 47,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 52,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 48,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 48,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 45,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 47,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 45,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 46,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 49,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 51,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 48,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 48,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 12,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 12,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 9,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 13,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 12,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 11,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 12,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 10,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 10,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 10,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 12,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 13,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 11,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 12,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 10,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 9,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 11,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 5,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 9,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 11,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 13,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 7,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 8,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 12,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 10,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 9,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 7,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 7,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 10,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 9,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 6,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 9,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 10,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 8,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 10,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 9,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 9,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 6,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 10,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 3,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 9,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 5,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 6,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 5,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 8,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 5,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 8,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 5,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 8,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 7,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 7,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 6,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 7,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 8,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 7,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 7,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 6,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 7,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 6,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 2,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 6,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 3,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 7,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 7,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase1_improvements": 3184,
+            "phase2_enabled": true,
+            "phase2_improvements": 538,
+            "phase2_start_step": 64,
+            "pool_mean_pairwise_distance": 125.61481481481482,
+            "restart_count": 0,
+            "state_diversity": 126.26934523809524,
+            "strategy_weights": {
+              "exponential": 1.0,
+              "linear": 1.0
+            }
+          },
+          "mean_sec": 0.18282667519524692,
+          "median_sec": 0.18267766700591892,
+          "name": "hybrid_mps:0",
+          "timings_sec": [
+            0.18570145894773304,
+            0.18312220799271017,
+            0.18046862503979355,
+            0.18267766700591892,
+            0.18216341699007899
+          ]
+        }
+      ],
+      "dims": 256
+    },
+    {
+      "cases": [
+        {
+          "best_energy_median": -209.78933032221508,
+          "last_stats": {
+            "best_energy": -209.78933032221508,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 53,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 58,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 52,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 52,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 47,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 46,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 53,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 48,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 45,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 51,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 49,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 44,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 40,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 45,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 46,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 51,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 49,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 50,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 43,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 49,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 52,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 46,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 54,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 43,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 46,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 46,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 47,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 51,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 50,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 47,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 54,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 49,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 40,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 50,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 50,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 49,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 51,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 43,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 52,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 48,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 54,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 43,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 54,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 50,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 46,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 44,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 44,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 49,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 43,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 46,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 49,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 34,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 46,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 50,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 39,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 46,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 40,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 42,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 43,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 44,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 46,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 47,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 47,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 43,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 28,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 36,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 43,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 38,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 45,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 34,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 41,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 49,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 45,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 45,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 41,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 39,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 40,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 43,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 49,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 41,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 42,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 25,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 40,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 38,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 39,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 41,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 34,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 37,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 34,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 38,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 42,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 42,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 28,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 35,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 38,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 39,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 36,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 32,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 33,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 39,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 35,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 38,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 34,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 28,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 30,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 32,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 30,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 34,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 29,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 37,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 34,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 29,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 30,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 36,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 26,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 29,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 23,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 34,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 26,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 34,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 32,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 28,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 26,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 30,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 23,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 34,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 35,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 27,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase2_enabled": false,
+            "phase2_improvements": 0,
+            "phase2_start_step": 128,
+            "pool_mean_pairwise_distance": 245.9292568897638,
+            "restart_count": 0,
+            "state_diversity": 252.61309523809524,
+            "strategy_weights": {
+              "exponential": 2285.1839273923542,
+              "linear": 27051.320207162626
+            }
+          },
+          "mean_sec": 3.34708900838159,
+          "median_sec": 3.33275166596286,
+          "name": "cpu_baseline",
+          "timings_sec": [
+            3.3482858329080045,
+            3.332222874974832,
+            3.4027860841015354,
+            3.33275166596286,
+            3.3193985839607194
+          ]
+        },
+        {
+          "best_energy_median": -237.45007101644123,
+          "last_stats": {
+            "best_energy": -218.63248688926836,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 54,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 52,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 56,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 48,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 55,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 50,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 49,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 52,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 50,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 47,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 58,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 45,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 41,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 44,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 52,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 53,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 48,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 47,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 43,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 51,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 48,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 42,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 48,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 48,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 48,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 51,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 47,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 54,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 49,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 47,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 49,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 50,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 32,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 43,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 49,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 48,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 48,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 48,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 54,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 52,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 46,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 50,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 48,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 43,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 46,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 44,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 48,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 43,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 49,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 46,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 44,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 47,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 43,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 44,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 41,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 45,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 39,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 44,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 46,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 44,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 51,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 44,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 44,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 46,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 8,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 12,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 12,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 10,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 13,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 11,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 11,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 12,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 8,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 9,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 12,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 10,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 9,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 13,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 12,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 10,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 12,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 7,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 11,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 8,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 9,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 9,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 9,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 9,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 11,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 7,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 11,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 11,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 9,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 9,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 8,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 11,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 10,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 9,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 6,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 8,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 6,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 9,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 9,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 7,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 8,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 6,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 9,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 7,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 6,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 12,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 5,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 11,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 13,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 9,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 5,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 6,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 10,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 5,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 6,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 6,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 4,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 9,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 6,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 8,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 6,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 3,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 4,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 8,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase1_improvements": 3035,
+            "phase2_enabled": true,
+            "phase2_improvements": 559,
+            "phase2_start_step": 64,
+            "pool_mean_pairwise_distance": 253.06550632911393,
+            "restart_count": 0,
+            "state_diversity": 254.35119047619048,
+            "strategy_weights": {
+              "exponential": 1.0,
+              "linear": 1.0
+            }
+          },
+          "mean_sec": 0.19805635802913457,
+          "median_sec": 0.19780008296947926,
+          "name": "hybrid_mps:0",
+          "timings_sec": [
+            0.20102437504101545,
+            0.1989782500313595,
+            0.19616879103705287,
+            0.19780008296947926,
+            0.19631029106676579
+          ]
+        }
+      ],
+      "dims": 512
+    },
+    {
+      "cases": [
+        {
+          "best_energy_median": -275.39342102225794,
+          "last_stats": {
+            "best_energy": -275.39342102225794,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 47,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 47,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 45,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 43,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 54,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 48,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 49,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 47,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 48,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 45,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 52,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 51,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 48,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 41,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 48,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 44,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 53,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 50,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 35,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 50,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 53,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 40,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 49,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 45,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 49,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 44,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 41,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 43,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 45,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 45,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 51,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 50,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 41,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 42,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 48,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 49,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 40,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 50,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 45,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 49,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 45,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 51,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 48,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 45,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 41,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 43,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 46,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 42,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 44,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 33,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 46,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 44,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 44,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 36,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 42,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 44,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 37,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 51,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 41,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 47,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 49,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 47,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 46,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 43,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 23,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 39,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 43,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 44,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 44,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 39,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 46,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 46,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 39,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 37,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 43,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 36,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 31,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 45,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 43,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 39,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 44,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 26,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 39,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 41,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 38,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 44,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 41,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 33,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 43,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 43,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 32,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 33,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 32,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 41,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 33,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 39,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 33,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 38,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 38,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 34,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 26,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 36,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 32,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 34,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 34,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 23,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 30,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 36,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 34,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 31,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 28,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 37,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 29,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 26,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 24,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 26,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 36,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 23,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 32,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 32,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 17,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 31,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 28,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 32,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 30,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 34,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 32,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 29,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase2_enabled": false,
+            "phase2_improvements": 0,
+            "phase2_start_step": 128,
+            "pool_mean_pairwise_distance": 497.59362696850394,
+            "restart_count": 0,
+            "state_diversity": 510.14980158730157,
+            "strategy_weights": {
+              "exponential": 2966.55249896849,
+              "linear": 46615.58964167655
+            }
+          },
+          "mean_sec": 3.857658058218658,
+          "median_sec": 3.8586334999417886,
+          "name": "cpu_baseline",
+          "timings_sec": [
+            3.8586334999417886,
+            3.873162875068374,
+            3.84257029206492,
+            3.849972208030522,
+            3.8639514159876853
+          ]
+        },
+        {
+          "best_energy_median": -296.15735076078585,
+          "last_stats": {
+            "best_energy": -304.9472372240442,
+            "clamp_mode": "soft",
+            "log_entries": [
+              {
+                "improvements": 50,
+                "step": 0,
+                "strategy": "linear",
+                "temperature": 5.0
+              },
+              {
+                "improvements": 48,
+                "step": 1,
+                "strategy": "linear",
+                "temperature": 4.960708661417323
+              },
+              {
+                "improvements": 47,
+                "step": 2,
+                "strategy": "linear",
+                "temperature": 4.921417322834646
+              },
+              {
+                "improvements": 49,
+                "step": 3,
+                "strategy": "linear",
+                "temperature": 4.882125984251968
+              },
+              {
+                "improvements": 43,
+                "step": 4,
+                "strategy": "linear",
+                "temperature": 4.842834645669291
+              },
+              {
+                "improvements": 49,
+                "step": 5,
+                "strategy": "linear",
+                "temperature": 4.803543307086614
+              },
+              {
+                "improvements": 52,
+                "step": 6,
+                "strategy": "linear",
+                "temperature": 4.764251968503937
+              },
+              {
+                "improvements": 46,
+                "step": 7,
+                "strategy": "linear",
+                "temperature": 4.724960629921259
+              },
+              {
+                "improvements": 51,
+                "step": 8,
+                "strategy": "linear",
+                "temperature": 4.6856692913385825
+              },
+              {
+                "improvements": 44,
+                "step": 9,
+                "strategy": "exponential",
+                "temperature": 3.2188772354882462
+              },
+              {
+                "improvements": 52,
+                "step": 10,
+                "strategy": "linear",
+                "temperature": 4.6070866141732285
+              },
+              {
+                "improvements": 44,
+                "step": 11,
+                "strategy": "linear",
+                "temperature": 4.5677952755905515
+              },
+              {
+                "improvements": 42,
+                "step": 12,
+                "strategy": "exponential",
+                "temperature": 2.7793882457919192
+              },
+              {
+                "improvements": 41,
+                "step": 13,
+                "strategy": "exponential",
+                "temperature": 2.6466559196086776
+              },
+              {
+                "improvements": 49,
+                "step": 14,
+                "strategy": "linear",
+                "temperature": 4.44992125984252
+              },
+              {
+                "improvements": 47,
+                "step": 15,
+                "strategy": "linear",
+                "temperature": 4.410629921259843
+              },
+              {
+                "improvements": 47,
+                "step": 16,
+                "strategy": "linear",
+                "temperature": 4.371338582677165
+              },
+              {
+                "improvements": 53,
+                "step": 17,
+                "strategy": "linear",
+                "temperature": 4.332047244094488
+              },
+              {
+                "improvements": 41,
+                "step": 18,
+                "strategy": "exponential",
+                "temperature": 2.072234131428891
+              },
+              {
+                "improvements": 46,
+                "step": 19,
+                "strategy": "linear",
+                "temperature": 4.253464566929134
+              },
+              {
+                "improvements": 44,
+                "step": 20,
+                "strategy": "linear",
+                "temperature": 4.214173228346457
+              },
+              {
+                "improvements": 41,
+                "step": 21,
+                "strategy": "exponential",
+                "temperature": 1.789301910592644
+              },
+              {
+                "improvements": 46,
+                "step": 22,
+                "strategy": "linear",
+                "temperature": 4.135590551181102
+              },
+              {
+                "improvements": 45,
+                "step": 23,
+                "strategy": "linear",
+                "temperature": 4.096299212598425
+              },
+              {
+                "improvements": 47,
+                "step": 24,
+                "strategy": "linear",
+                "temperature": 4.057007874015748
+              },
+              {
+                "improvements": 57,
+                "step": 25,
+                "strategy": "linear",
+                "temperature": 4.01771653543307
+              },
+              {
+                "improvements": 44,
+                "step": 26,
+                "strategy": "linear",
+                "temperature": 3.9784251968503934
+              },
+              {
+                "improvements": 46,
+                "step": 27,
+                "strategy": "linear",
+                "temperature": 3.9391338582677164
+              },
+              {
+                "improvements": 51,
+                "step": 28,
+                "strategy": "linear",
+                "temperature": 3.8998425196850395
+              },
+              {
+                "improvements": 46,
+                "step": 29,
+                "strategy": "linear",
+                "temperature": 3.860551181102362
+              },
+              {
+                "improvements": 44,
+                "step": 30,
+                "strategy": "linear",
+                "temperature": 3.821259842519685
+              },
+              {
+                "improvements": 55,
+                "step": 31,
+                "strategy": "linear",
+                "temperature": 3.7819685039370077
+              },
+              {
+                "improvements": 29,
+                "step": 32,
+                "strategy": "exponential",
+                "temperature": 1.04451473309536
+              },
+              {
+                "improvements": 43,
+                "step": 33,
+                "strategy": "linear",
+                "temperature": 3.7033858267716537
+              },
+              {
+                "improvements": 51,
+                "step": 34,
+                "strategy": "linear",
+                "temperature": 3.664094488188976
+              },
+              {
+                "improvements": 43,
+                "step": 35,
+                "strategy": "linear",
+                "temperature": 3.624803149606299
+              },
+              {
+                "improvements": 45,
+                "step": 36,
+                "strategy": "linear",
+                "temperature": 3.585511811023622
+              },
+              {
+                "improvements": 50,
+                "step": 37,
+                "strategy": "linear",
+                "temperature": 3.546220472440945
+              },
+              {
+                "improvements": 47,
+                "step": 38,
+                "strategy": "linear",
+                "temperature": 3.5069291338582675
+              },
+              {
+                "improvements": 44,
+                "step": 39,
+                "strategy": "linear",
+                "temperature": 3.46763779527559
+              },
+              {
+                "improvements": 49,
+                "step": 40,
+                "strategy": "linear",
+                "temperature": 3.428346456692913
+              },
+              {
+                "improvements": 42,
+                "step": 41,
+                "strategy": "linear",
+                "temperature": 3.389055118110236
+              },
+              {
+                "improvements": 48,
+                "step": 42,
+                "strategy": "linear",
+                "temperature": 3.3497637795275588
+              },
+              {
+                "improvements": 51,
+                "step": 43,
+                "strategy": "linear",
+                "temperature": 3.310472440944882
+              },
+              {
+                "improvements": 42,
+                "step": 44,
+                "strategy": "linear",
+                "temperature": 3.2711811023622044
+              },
+              {
+                "improvements": 43,
+                "step": 45,
+                "strategy": "linear",
+                "temperature": 3.2318897637795274
+              },
+              {
+                "improvements": 49,
+                "step": 46,
+                "strategy": "linear",
+                "temperature": 3.1925984251968504
+              },
+              {
+                "improvements": 47,
+                "step": 47,
+                "strategy": "linear",
+                "temperature": 3.153307086614173
+              },
+              {
+                "improvements": 40,
+                "step": 48,
+                "strategy": "linear",
+                "temperature": 3.114015748031496
+              },
+              {
+                "improvements": 44,
+                "step": 49,
+                "strategy": "linear",
+                "temperature": 3.0747244094488186
+              },
+              {
+                "improvements": 45,
+                "step": 50,
+                "strategy": "linear",
+                "temperature": 3.0354330708661417
+              },
+              {
+                "improvements": 42,
+                "step": 51,
+                "strategy": "linear",
+                "temperature": 2.9961417322834643
+              },
+              {
+                "improvements": 50,
+                "step": 52,
+                "strategy": "linear",
+                "temperature": 2.9568503937007873
+              },
+              {
+                "improvements": 43,
+                "step": 53,
+                "strategy": "linear",
+                "temperature": 2.9175590551181103
+              },
+              {
+                "improvements": 47,
+                "step": 54,
+                "strategy": "linear",
+                "temperature": 2.878267716535433
+              },
+              {
+                "improvements": 48,
+                "step": 55,
+                "strategy": "linear",
+                "temperature": 2.838976377952756
+              },
+              {
+                "improvements": 45,
+                "step": 56,
+                "strategy": "linear",
+                "temperature": 2.7996850393700785
+              },
+              {
+                "improvements": 41,
+                "step": 57,
+                "strategy": "linear",
+                "temperature": 2.7603937007874015
+              },
+              {
+                "improvements": 41,
+                "step": 58,
+                "strategy": "linear",
+                "temperature": 2.721102362204724
+              },
+              {
+                "improvements": 45,
+                "step": 59,
+                "strategy": "linear",
+                "temperature": 2.681811023622047
+              },
+              {
+                "improvements": 44,
+                "step": 60,
+                "strategy": "linear",
+                "temperature": 2.64251968503937
+              },
+              {
+                "improvements": 38,
+                "step": 61,
+                "strategy": "linear",
+                "temperature": 2.6032283464566928
+              },
+              {
+                "improvements": 37,
+                "step": 62,
+                "strategy": "linear",
+                "temperature": 2.5639370078740154
+              },
+              {
+                "improvements": 48,
+                "step": 63,
+                "strategy": "linear",
+                "temperature": 2.5246456692913384
+              },
+              {
+                "improvements": 6,
+                "step": 64,
+                "strategy": "exponential",
+                "temperature": 0.21820220553065414
+              },
+              {
+                "improvements": 7,
+                "step": 65,
+                "strategy": "linear",
+                "temperature": 2.4460629921259844
+              },
+              {
+                "improvements": 5,
+                "step": 66,
+                "strategy": "linear",
+                "temperature": 2.406771653543307
+              },
+              {
+                "improvements": 9,
+                "step": 67,
+                "strategy": "linear",
+                "temperature": 2.36748031496063
+              },
+              {
+                "improvements": 10,
+                "step": 68,
+                "strategy": "linear",
+                "temperature": 2.328188976377952
+              },
+              {
+                "improvements": 11,
+                "step": 69,
+                "strategy": "linear",
+                "temperature": 2.288897637795275
+              },
+              {
+                "improvements": 10,
+                "step": 70,
+                "strategy": "linear",
+                "temperature": 2.2496062992125982
+              },
+              {
+                "improvements": 8,
+                "step": 71,
+                "strategy": "linear",
+                "temperature": 2.2103149606299213
+              },
+              {
+                "improvements": 10,
+                "step": 72,
+                "strategy": "linear",
+                "temperature": 2.171023622047244
+              },
+              {
+                "improvements": 9,
+                "step": 73,
+                "strategy": "linear",
+                "temperature": 2.131732283464567
+              },
+              {
+                "improvements": 10,
+                "step": 74,
+                "strategy": "linear",
+                "temperature": 2.09244094488189
+              },
+              {
+                "improvements": 11,
+                "step": 75,
+                "strategy": "linear",
+                "temperature": 2.0531496062992125
+              },
+              {
+                "improvements": 10,
+                "step": 76,
+                "strategy": "linear",
+                "temperature": 2.013858267716535
+              },
+              {
+                "improvements": 11,
+                "step": 77,
+                "strategy": "linear",
+                "temperature": 1.9745669291338581
+              },
+              {
+                "improvements": 8,
+                "step": 78,
+                "strategy": "linear",
+                "temperature": 1.9352755905511807
+              },
+              {
+                "improvements": 10,
+                "step": 79,
+                "strategy": "linear",
+                "temperature": 1.8959842519685037
+              },
+              {
+                "improvements": 8,
+                "step": 80,
+                "strategy": "linear",
+                "temperature": 1.8566929133858268
+              },
+              {
+                "improvements": 9,
+                "step": 81,
+                "strategy": "exponential",
+                "temperature": 0.09496852364023303
+              },
+              {
+                "improvements": 10,
+                "step": 82,
+                "strategy": "linear",
+                "temperature": 1.7781102362204724
+              },
+              {
+                "improvements": 12,
+                "step": 83,
+                "strategy": "linear",
+                "temperature": 1.7388188976377954
+              },
+              {
+                "improvements": 12,
+                "step": 84,
+                "strategy": "linear",
+                "temperature": 1.6995275590551175
+              },
+              {
+                "improvements": 11,
+                "step": 85,
+                "strategy": "linear",
+                "temperature": 1.6602362204724406
+              },
+              {
+                "improvements": 13,
+                "step": 86,
+                "strategy": "linear",
+                "temperature": 1.6209448818897636
+              },
+              {
+                "improvements": 9,
+                "step": 87,
+                "strategy": "linear",
+                "temperature": 1.5816535433070866
+              },
+              {
+                "improvements": 9,
+                "step": 88,
+                "strategy": "linear",
+                "temperature": 1.5423622047244092
+              },
+              {
+                "improvements": 9,
+                "step": 89,
+                "strategy": "linear",
+                "temperature": 1.5030708661417322
+              },
+              {
+                "improvements": 10,
+                "step": 90,
+                "strategy": "linear",
+                "temperature": 1.4637795275590553
+              },
+              {
+                "improvements": 9,
+                "step": 91,
+                "strategy": "linear",
+                "temperature": 1.4244881889763779
+              },
+              {
+                "improvements": 13,
+                "step": 92,
+                "strategy": "linear",
+                "temperature": 1.3851968503937004
+              },
+              {
+                "improvements": 9,
+                "step": 93,
+                "strategy": "linear",
+                "temperature": 1.3459055118110235
+              },
+              {
+                "improvements": 13,
+                "step": 94,
+                "strategy": "linear",
+                "temperature": 1.306614173228346
+              },
+              {
+                "improvements": 7,
+                "step": 95,
+                "strategy": "linear",
+                "temperature": 1.267322834645669
+              },
+              {
+                "improvements": 10,
+                "step": 96,
+                "strategy": "linear",
+                "temperature": 1.2280314960629921
+              },
+              {
+                "improvements": 8,
+                "step": 97,
+                "strategy": "linear",
+                "temperature": 1.1887401574803151
+              },
+              {
+                "improvements": 10,
+                "step": 98,
+                "strategy": "linear",
+                "temperature": 1.1494488188976377
+              },
+              {
+                "improvements": 9,
+                "step": 99,
+                "strategy": "linear",
+                "temperature": 1.1101574803149608
+              },
+              {
+                "improvements": 9,
+                "step": 100,
+                "strategy": "linear",
+                "temperature": 1.070866141732283
+              },
+              {
+                "improvements": 6,
+                "step": 101,
+                "strategy": "linear",
+                "temperature": 1.031574803149606
+              },
+              {
+                "improvements": 9,
+                "step": 102,
+                "strategy": "linear",
+                "temperature": 0.9922834645669285
+              },
+              {
+                "improvements": 7,
+                "step": 103,
+                "strategy": "exponential",
+                "temperature": 0.03236246364890959
+              },
+              {
+                "improvements": 8,
+                "step": 104,
+                "strategy": "linear",
+                "temperature": 0.9137007874015746
+              },
+              {
+                "improvements": 6,
+                "step": 105,
+                "strategy": "exponential",
+                "temperature": 0.029345270085280692
+              },
+              {
+                "improvements": 10,
+                "step": 106,
+                "strategy": "linear",
+                "temperature": 0.8351181102362206
+              },
+              {
+                "improvements": 6,
+                "step": 107,
+                "strategy": "linear",
+                "temperature": 0.7958267716535437
+              },
+              {
+                "improvements": 12,
+                "step": 108,
+                "strategy": "linear",
+                "temperature": 0.7565354330708658
+              },
+              {
+                "improvements": 8,
+                "step": 109,
+                "strategy": "linear",
+                "temperature": 0.7172440944881888
+              },
+              {
+                "improvements": 10,
+                "step": 110,
+                "strategy": "linear",
+                "temperature": 0.6779527559055119
+              },
+              {
+                "improvements": 7,
+                "step": 111,
+                "strategy": "linear",
+                "temperature": 0.6386614173228349
+              },
+              {
+                "improvements": 7,
+                "step": 112,
+                "strategy": "linear",
+                "temperature": 0.599370078740157
+              },
+              {
+                "improvements": 8,
+                "step": 113,
+                "strategy": "linear",
+                "temperature": 0.56007874015748
+              },
+              {
+                "improvements": 10,
+                "step": 114,
+                "strategy": "exponential",
+                "temperature": 0.01889176436935285
+              },
+              {
+                "improvements": 8,
+                "step": 115,
+                "strategy": "linear",
+                "temperature": 0.4814960629921261
+              },
+              {
+                "improvements": 11,
+                "step": 116,
+                "strategy": "linear",
+                "temperature": 0.44220472440944825
+              },
+              {
+                "improvements": 9,
+                "step": 117,
+                "strategy": "linear",
+                "temperature": 0.4029133858267713
+              },
+              {
+                "improvements": 10,
+                "step": 118,
+                "strategy": "linear",
+                "temperature": 0.3636220472440943
+              },
+              {
+                "improvements": 9,
+                "step": 119,
+                "strategy": "linear",
+                "temperature": 0.32433070866141733
+              },
+              {
+                "improvements": 5,
+                "step": 120,
+                "strategy": "exponential",
+                "temperature": 0.014085171076173577
+              },
+              {
+                "improvements": 6,
+                "step": 121,
+                "strategy": "linear",
+                "temperature": 0.2457480314960625
+              },
+              {
+                "improvements": 9,
+                "step": 122,
+                "strategy": "linear",
+                "temperature": 0.20645669291338553
+              },
+              {
+                "improvements": 12,
+                "step": 123,
+                "strategy": "linear",
+                "temperature": 0.16716535433070856
+              },
+              {
+                "improvements": 6,
+                "step": 124,
+                "strategy": "linear",
+                "temperature": 0.1278740157480307
+              },
+              {
+                "improvements": 6,
+                "step": 125,
+                "strategy": "linear",
+                "temperature": 0.08858267716535373
+              },
+              {
+                "improvements": 7,
+                "step": 126,
+                "strategy": "linear",
+                "temperature": 0.04929133858267676
+              },
+              {
+                "improvements": 6,
+                "step": 127,
+                "strategy": "linear",
+                "temperature": 0.009999999999999787
+              }
+            ],
+            "phase1_improvements": 2928,
+            "phase2_enabled": true,
+            "phase2_improvements": 572,
+            "phase2_start_step": 64,
+            "pool_mean_pairwise_distance": 508.6074074074074,
+            "restart_count": 0,
+            "state_diversity": 511.40724206349205,
+            "strategy_weights": {
+              "exponential": 1.0,
+              "linear": 1.0
+            }
+          },
+          "mean_sec": 0.22019748361781238,
+          "median_sec": 0.21945491700898856,
+          "name": "hybrid_mps:0",
+          "timings_sec": [
+            0.21862529206555337,
+            0.22207699995487928,
+            0.21945491700898856,
+            0.21829504205379635,
+            0.22253516700584441
+          ]
+        }
+      ],
+      "dims": 1024
+    }
+  ]
+}

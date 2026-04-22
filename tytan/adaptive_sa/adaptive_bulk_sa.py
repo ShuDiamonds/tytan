@@ -11,6 +11,7 @@ from .. import _rust_backend
 from .anneal_logger import AnnealLogger
 from .clamp_manager import ClampManager
 from .delta_evaluator import DeltaEvaluator
+from .sparse_qubo import SparseNeighbors, build_sparse_neighbors
 from .solution_pool import SolutionPool
 from .strategy_manager import StrategyManager
 
@@ -44,6 +45,12 @@ class AdaptiveBulkSASampler:
         restart_burnin_steps: int = 1,
         restart_diversity_threshold: Optional[float] = None,
         novelty_weight: float = 0.05,
+        phase2_enabled: bool = False,
+        phase2_start_step: Optional[int] = None,
+        phase2_top_k: int = 16,
+        phase2_sweeps_per_step: int = 1,
+        sparse_threshold: float = 0.0,
+        pool_offer_mode: str = "per_flip",
     ) -> None:
         if shots < 1 or steps < 1:
             raise ValueError("shots and steps must be positive")
@@ -63,6 +70,12 @@ class AdaptiveBulkSASampler:
             raise ValueError("restart_burnin_steps cannot be negative")
         if novelty_weight < 0:
             raise ValueError("novelty_weight cannot be negative")
+        if phase2_top_k < 0:
+            raise ValueError("phase2_top_k cannot be negative")
+        if phase2_sweeps_per_step < 1:
+            raise ValueError("phase2_sweeps_per_step must be positive")
+        if sparse_threshold < 0:
+            raise ValueError("sparse_threshold cannot be negative")
         self.seed = seed
         self.shots = shots
         self.steps = steps
@@ -93,6 +106,12 @@ class AdaptiveBulkSASampler:
         self.restart_burnin_steps = restart_burnin_steps
         self.restart_diversity_threshold = restart_diversity_threshold
         self.novelty_weight = novelty_weight
+        self.phase2_enabled = bool(phase2_enabled)
+        self.phase2_start_step = phase2_start_step
+        self.phase2_top_k = int(phase2_top_k)
+        self.phase2_sweeps_per_step = int(phase2_sweeps_per_step)
+        self.sparse_threshold = float(sparse_threshold)
+        self.pool_offer_mode = str(pool_offer_mode).strip().lower()
         self.rng = np.random.RandomState(self.seed)
 
     def _temperature(self, step: int, strategy_type: str) -> float:
@@ -113,6 +132,207 @@ class AdaptiveBulkSASampler:
         if min_work <= 0:
             return False
         return shots * size >= min_work
+
+    def _phase2_start(self) -> int:
+        if not self.phase2_enabled:
+            return int(self.steps)
+        if self.phase2_start_step is None:
+            return max(0, int(self.steps) // 2)
+        return int(min(max(int(self.phase2_start_step), 0), int(self.steps)))
+
+    @staticmethod
+    def _pool_offer_mode_valid(mode: str) -> bool:
+        return mode in {"per_flip", "phase_end", "off"}
+
+    @staticmethod
+    def _offer_phase_end(pool: SolutionPool, states: np.ndarray, energies: np.ndarray) -> None:
+        for idx in range(states.shape[0]):
+            pool.offer(states[idx], float(energies[idx]))
+
+    @staticmethod
+    def _delta_cache_init(states: np.ndarray, qmatrix: np.ndarray) -> np.ndarray:
+        """Initialize delta-cache for 0/1 state representation.
+
+        Uses the identity:
+          ΔE_i = flip_i * ((Q + Q.T) @ state)_i + Q_ii
+        where flip_i = 1 - 2 * state_i.
+        """
+
+        q = np.asarray(qmatrix, dtype=float)
+        qsym = q + q.T
+        diag = np.diag(q)
+        flip = 1.0 - 2.0 * states
+        cross = states @ qsym.T
+        return flip * cross + diag
+
+    def _run_phase2_delta_cache(
+        self,
+        states: np.ndarray,
+        energies: np.ndarray,
+        qmatrix: np.ndarray,
+        sparse: SparseNeighbors,
+        start_step: int,
+        pool: SolutionPool,
+        best_state: np.ndarray,
+        best_energy: float,
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, int]:
+        """Phase2: delta-cache SA on top-k states (CPU)."""
+
+        if start_step >= self.steps:
+            return states, energies, best_state, best_energy, 0
+        if self.phase2_top_k < 1:
+            return states, energies, best_state, best_energy, 0
+        top_k = min(int(self.phase2_top_k), int(states.shape[0]))
+        selected = np.argsort(energies)[:top_k]
+        sel_states = np.ascontiguousarray(states[selected], dtype=float)
+        sel_energies = np.ascontiguousarray(energies[selected], dtype=float)
+        delta_cache = self._delta_cache_init(sel_states, qmatrix)
+
+        n = int(sel_states.shape[1])
+        offsets = sparse.offsets
+        neigh = sparse.neighbors
+        weights = sparse.weights
+
+        improvements_total = 0
+        for step in range(int(start_step), int(self.steps)):
+            strategy = self.strategy_manager.select()
+            temperature = float(max(self._temperature(step, strategy.get("type", "linear")), 1e-8))
+            improvements_step = 0
+            for _ in range(max(1, int(self.phase2_sweeps_per_step))):
+                for r in range(top_k):
+                    idx = int(self.rng.randint(n))
+                    change = float(delta_cache[r, idx])
+                    if change <= 0.0 or self.rng.rand() < np.exp(-change / temperature):
+                        flip_i = 1.0 - 2.0 * sel_states[r, idx]
+                        sel_states[r, idx] = 1.0 - sel_states[r, idx]
+                        sel_energies[r] += change
+                        delta_cache[r, idx] = -delta_cache[r, idx]
+
+                        start = int(offsets[idx])
+                        end = int(offsets[idx + 1])
+                        if start != end:
+                            js = neigh[start:end]
+                            ws = weights[start:end]
+                            flips_j = 1.0 - 2.0 * sel_states[r, js]
+                            delta_cache[r, js] += flips_j * ws * flip_i
+                        improvements_total += 1
+                        improvements_step += 1
+
+            self.logger.log(
+                strategy=strategy["name"],
+                temperature=temperature,
+                improvements=improvements_step,
+            )
+
+        states[selected] = sel_states
+        energies[selected] = sel_energies
+
+        best_idx = int(np.argmin(energies))
+        candidate_best_energy = float(energies[best_idx])
+        if candidate_best_energy < best_energy:
+            best_energy = candidate_best_energy
+            best_state = states[best_idx].copy()
+
+        if self.pool_offer_mode == "phase_end":
+            self._offer_phase_end(pool, states, energies)
+        elif self.pool_offer_mode == "per_flip":
+            for idx in selected.tolist():
+                pool.offer(states[int(idx)], float(energies[int(idx)]))
+
+        pool.offer(best_state, best_energy)
+        return states, energies, best_state, best_energy, improvements_total
+
+    def _run_phase1_gpu(
+        self,
+        qmatrix: np.ndarray,
+        states: np.ndarray,
+        energies: np.ndarray,
+        steps: int,
+        pool: SolutionPool,
+        best_state: np.ndarray,
+        best_energy: float,
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, int]:
+        """Phase1: dense batch SA with PyTorch on the configured device.
+
+        This keeps the same 0/1 state representation as the CPU path.
+        """
+
+        try:
+            import torch
+        except Exception as exc:  # pragma: no cover
+            raise ImportError(
+                "device is not cpu, but PyTorch is not available in the current environment. "
+                "If you are using `uv run`, install torch into that environment (e.g. "
+                "`/bin/zsh -lc \"UV_CACHE_DIR=.uv-cache uv add torch\"`)."
+            ) from exc
+
+        device = torch.device(self.device)
+        dev_str = str(device).lower()
+        if dev_str.startswith("mps") and not torch.backends.mps.is_available():
+            raise ImportError(
+                "device is set to mps, but torch.backends.mps.is_available() is False in this environment. "
+                "Run with device='cpu' or fix the PyTorch/MPS setup."
+            )
+        if dev_str.startswith("cuda") and not torch.cuda.is_available():
+            raise ImportError(
+                "device is set to cuda, but torch.cuda.is_available() is False in this environment. "
+                "Run with device='cpu' or fix the PyTorch/CUDA setup."
+            )
+        q = torch.tensor(np.asarray(qmatrix, dtype=np.float32), device=device)
+        qsym = q + q.T
+        diag = torch.diag(q)
+
+        torch_states = torch.tensor(np.asarray(states, dtype=np.float32), device=device)
+        torch_energies = torch.tensor(np.asarray(energies, dtype=np.float32), device=device)
+        shots = int(torch_states.shape[0])
+        n = int(torch_states.shape[1])
+        rows = torch.arange(shots, device=device, dtype=torch.long)
+
+        improvements_total = 0
+        for step in range(int(steps)):
+            strategy = self.strategy_manager.select()
+            temperature = float(max(self._temperature(step, strategy.get("type", "linear")), 1e-8))
+            idx = torch.randint(0, n, (shots,), device=device, dtype=torch.long)
+            s_i = torch_states[rows, idx]
+            flip = 1.0 - 2.0 * s_i
+            cross = (qsym[idx] * torch_states).sum(dim=1)
+            delta = flip * cross + diag[idx]
+
+            accept = (delta <= 0.0) | (torch.rand(shots, device=device) < torch.exp(-delta / temperature))
+            improvements = 0
+            if bool(accept.any()):
+                acc_rows = rows[accept]
+                acc_idx = idx[accept]
+                torch_states[acc_rows, acc_idx] = 1.0 - torch_states[acc_rows, acc_idx]
+                torch_energies[acc_rows] += delta[accept]
+                improvements = int(acc_rows.numel())
+                improvements_total += improvements
+
+                if self.pool_offer_mode == "per_flip":
+                    acc_states_cpu = torch_states[acc_rows].detach().to("cpu").numpy()
+                    acc_energies_cpu = torch_energies[acc_rows].detach().to("cpu").numpy()
+                    for s, e in zip(acc_states_cpu, acc_energies_cpu):
+                        pool.offer(s.astype(float), float(e))
+
+            self.logger.log(strategy=strategy["name"], temperature=temperature, improvements=improvements)
+
+            if self.enable_clamp and improvements == 0:
+                occ = torch_states.mean(dim=0).detach().to("cpu").numpy()
+                occupancy = {i: float(occ[i]) for i in range(n)}
+                self.clamp_manager.update_scores(occupancy)
+
+            step_best_idx = int(torch_energies.argmin().item())
+            step_best_energy = float(torch_energies[step_best_idx].item())
+            if step_best_energy < best_energy:
+                best_energy = step_best_energy
+                best_state = torch_states[step_best_idx].detach().to("cpu").numpy().astype(float)
+
+        out_states = torch_states.detach().to("cpu").numpy().astype(float)
+        out_energies = torch_energies.detach().to("cpu").numpy().astype(float)
+        if self.pool_offer_mode == "phase_end":
+            self._offer_phase_end(pool, out_states, out_energies)
+        pool.offer(best_state, best_energy)
+        return out_states, out_energies, best_state, best_energy, improvements_total
 
     @staticmethod
     def _state_diversity(states: np.ndarray) -> float:
@@ -165,10 +385,13 @@ class AdaptiveBulkSASampler:
         shots = shots or self.shots
         shots = max(1, int(shots))
         include_diverse = self.include_diverse if include_diverse is None else include_diverse
+        if not self._pool_offer_mode_valid(self.pool_offer_mode):
+            raise ValueError("pool_offer_mode must be one of: per_flip, phase_end, off")
         if (
             self.device == "cpu"
             and _rust_backend.adaptive_bulk_sa_available()
             and not self.enable_clamp
+            and not self.phase2_enabled
             and all(isinstance(name, str) for name in index_map)
         ):
             index_names = [str(name) for name, _ in sorted(index_map.items(), key=lambda item: item[1])]
@@ -201,6 +424,71 @@ class AdaptiveBulkSASampler:
                 if return_stats or self.return_stats:
                     return result, stats
                 return result
+
+        phase2_start = self._phase2_start()
+        if self.device != "cpu":
+            pool = SolutionPool(
+                best_k=min(self.batch_size, shots),
+                diverse_k=2,
+                max_entries=self.pool_max_entries,
+                near_dup_hamming=self.near_dup_hamming,
+                replace_margin=self.replace_margin,
+            )
+            states = self.rng.randint(0, 2, size=(shots, qmatrix_f.shape[0])).astype(float)
+            states = np.ascontiguousarray(states)
+            evaluator = DeltaEvaluator(qmatrix_f)
+            energies = np.array([evaluator.evaluate(state) for state in states])
+            energies = np.ascontiguousarray(energies, dtype=float)
+
+            best_idx = int(np.argmin(energies))
+            best_energy = float(energies[best_idx])
+            best_state = states[best_idx].copy()
+
+            phase1_steps = min(int(phase2_start), int(self.steps))
+            states, energies, best_state, best_energy, phase1_improvements = self._run_phase1_gpu(
+                qmatrix_f,
+                states,
+                energies,
+                phase1_steps,
+                pool,
+                best_state,
+                best_energy,
+            )
+
+            phase2_improvements = 0
+            if self.phase2_enabled and phase2_start < self.steps:
+                sparse = build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
+                states, energies, best_state, best_energy, phase2_improvements = self._run_phase2_delta_cache(
+                    states,
+                    energies,
+                    qmatrix_f,
+                    sparse,
+                    int(phase2_start),
+                    pool,
+                    best_state,
+                    best_energy,
+                )
+
+            if self.pool_offer_mode == "off":
+                pool.offer(best_state, best_energy)
+
+            result = pool.to_results(index_map, include_diverse=include_diverse)
+            stats = {
+                "best_energy": best_energy,
+                "strategy_weights": self.strategy_manager.weights,
+                "log_entries": self.logger.entries,
+                "clamp_mode": self.clamp_manager.clamp_mode,
+                "restart_count": 0,
+                "pool_mean_pairwise_distance": pool.mean_pairwise_distance(),
+                "state_diversity": self._state_diversity(states),
+                "phase1_improvements": phase1_improvements,
+                "phase2_improvements": phase2_improvements,
+                "phase2_enabled": bool(self.phase2_enabled),
+                "phase2_start_step": int(phase2_start),
+            }
+            if return_stats or self.return_stats:
+                return result, stats
+            return result
         states = self.rng.randint(0, 2, size=(shots, qmatrix_f.shape[0])).astype(float)
         states = np.ascontiguousarray(states)
         evaluator = DeltaEvaluator(qmatrix_f)
@@ -230,6 +518,7 @@ class AdaptiveBulkSASampler:
             not self.adaptive
             and self.device == "cpu"
             and _rust_backend.rust_available()
+            and not self.phase2_enabled
             and self._should_use_rust_step(shots, qmatrix_f.shape[0])
         ):
             step_plan = []
@@ -306,7 +595,11 @@ class AdaptiveBulkSASampler:
                     return result, stats
                 return result
 
-        for step in range(self.steps):
+        sparse = None
+        if self.phase2_enabled and phase2_start < self.steps:
+            sparse = build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
+
+        for step in range(min(self.steps, phase2_start)):
             strategy = self.strategy_manager.select()
             temperature = self._temperature(step, strategy.get("type", "linear"))
             improvements = 0
@@ -417,6 +710,19 @@ class AdaptiveBulkSASampler:
                 last_restart_step = step
                 if best_energy < previous_best_energy:
                     last_best_step = step
+
+        phase2_improvements = 0
+        if sparse is not None and phase2_start < self.steps:
+            states, energies, best_state, best_energy, phase2_improvements = self._run_phase2_delta_cache(
+                states,
+                energies,
+                qmatrix_f,
+                sparse,
+                int(phase2_start),
+                pool,
+                best_state,
+                best_energy,
+            )
         pool.offer(best_state, best_energy)
         result = pool.to_results(index_map, include_diverse=include_diverse)
         stats = {
@@ -427,6 +733,9 @@ class AdaptiveBulkSASampler:
             "restart_count": restart_events,
             "pool_mean_pairwise_distance": pool.mean_pairwise_distance(),
             "state_diversity": self._state_diversity(states),
+            "phase2_improvements": phase2_improvements,
+            "phase2_enabled": bool(self.phase2_enabled),
+            "phase2_start_step": int(phase2_start),
         }
         if return_stats or self.return_stats:
             return result, stats
