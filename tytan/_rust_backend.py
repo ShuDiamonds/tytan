@@ -134,6 +134,15 @@ def rust_available() -> bool:
 def adaptive_bulk_sa_available() -> bool:
     return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "adaptive_bulk_sa")
 
+def phase2_available() -> bool:
+    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "sa_phase2_delta_cache")
+
+def sparse_available() -> bool:
+    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "build_sparse_neighbors")
+
+def pool_available() -> bool:
+    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "pool_select")
+
 
 def mip_presolve_available() -> bool:
     return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "presolve_plan")
@@ -196,6 +205,81 @@ def try_batch_delta_fast(
         return None
     symmetric = _is_symmetric_matrix(qmatrix_f)
     return np.asarray(_RUST_MODULE.batch_delta(states_f, qmatrix_f, indices_i, energies_f, symmetric), dtype=float)
+
+def try_build_sparse_neighbors(
+    qmatrix: np.ndarray,
+    threshold: float = 0.0,
+):
+    if _RUST_MODULE is None or not hasattr(_RUST_MODULE, "build_sparse_neighbors"):
+        return None
+    qmatrix_f = _as_float64_c(qmatrix)
+    offsets, neighbors, weights = _RUST_MODULE.build_sparse_neighbors(qmatrix_f, float(threshold))
+    return (
+        np.asarray(offsets, dtype=np.int64),
+        np.asarray(neighbors, dtype=np.int64),
+        np.asarray(weights, dtype=float),
+    )
+
+
+def try_sa_phase2_delta_cache(
+    states: np.ndarray,
+    energies: np.ndarray,
+    qmatrix: np.ndarray,
+    offsets: np.ndarray,
+    neighbors: np.ndarray,
+    weights: np.ndarray,
+    betas: np.ndarray,
+    sweeps_per_step: int = 1,
+    rng_state: int = 0,
+    top_k: int = 16,
+):
+    if _RUST_MODULE is None or not hasattr(_RUST_MODULE, "sa_phase2_delta_cache"):
+        return None
+    states_f = _as_float64_c(states)
+    energies_f = _as_float64_c(energies)
+    qmatrix_f = _as_float64_c(qmatrix)
+    offsets_i = _as_int64_c(offsets)
+    neighbors_i = _as_int64_c(neighbors)
+    weights_f = _as_float64_c(weights)
+    betas_f = _as_float64_c(betas)
+    return _RUST_MODULE.sa_phase2_delta_cache(
+        states_f,
+        energies_f,
+        qmatrix_f,
+        offsets_i,
+        neighbors_i,
+        weights_f,
+        betas_f,
+        int(sweeps_per_step),
+        int(rng_state),
+        int(top_k),
+    )
+
+
+def try_pool_select(
+    states: np.ndarray,
+    energies: np.ndarray,
+    best_k: int = 4,
+    diverse_k: int = 2,
+    max_entries: int = 128,
+    near_dup_hamming: int = 2,
+    replace_margin: float = 1e-6,
+    include_diverse: bool = True,
+):
+    if _RUST_MODULE is None or not hasattr(_RUST_MODULE, "pool_select"):
+        return None
+    states_f = _as_float64_c(states)
+    energies_f = _as_float64_c(energies)
+    return _RUST_MODULE.pool_select(
+        states_f,
+        energies_f,
+        int(best_k),
+        int(diverse_k),
+        int(max_entries),
+        int(near_dup_hamming),
+        float(replace_margin),
+        bool(include_diverse),
+    )
 
 
 def try_aggregate_results(
