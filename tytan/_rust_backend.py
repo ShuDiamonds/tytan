@@ -132,7 +132,11 @@ def rust_available() -> bool:
 
 
 def adaptive_bulk_sa_available() -> bool:
-    return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "adaptive_bulk_sa")
+    # The full Rust core path is intentionally opt-in because it bypasses the
+    # Python orchestration logic (batch-delta / step fast paths) and is still
+    # evolving. Enable explicitly via `TYTAN_RUST_CORE=1`.
+    core_enabled = os.getenv("TYTAN_RUST_CORE", "0").strip().lower() in {"1", "true", "yes", "on"}
+    return core_enabled and _RUST_MODULE is not None and hasattr(_RUST_MODULE, "adaptive_bulk_sa")
 
 def phase2_available() -> bool:
     return _RUST_MODULE is not None and hasattr(_RUST_MODULE, "sa_phase2_delta_cache")
@@ -344,6 +348,8 @@ def try_adaptive_bulk_sa(
     novelty_weight: float,
     seed: Optional[int],
 ):
+    if not adaptive_bulk_sa_available():
+        return None
     if _RUST_MODULE is None:
         return None
     qmatrix_f = _as_float64_c(qmatrix)
