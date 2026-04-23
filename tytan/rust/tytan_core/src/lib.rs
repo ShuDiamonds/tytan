@@ -6,9 +6,11 @@ use pyo3::types::{PyDict, PyList};
 mod adaptive;
 mod anneal;
 mod delta;
+mod phase2;
 mod pool;
 mod presolve;
 mod reduce;
+mod sparse;
 mod types;
 
 #[pyfunction(signature = (state, qmatrix, index, current_energy=None, symmetric=false))]
@@ -99,6 +101,220 @@ fn batch_delta<'py>(
         .map_err(PyValueError::new_err)?;
 
     Ok(PyArray1::from_vec_bound(py, out))
+}
+
+#[pyfunction(signature = (qmatrix, threshold=0.0))]
+fn build_sparse_neighbors<'py>(
+    py: Python<'py>,
+    qmatrix: PyReadonlyArray2<'py, f64>,
+    threshold: f64,
+) -> PyResult<(
+    Bound<'py, PyArray1<i64>>,
+    Bound<'py, PyArray1<i64>>,
+    Bound<'py, PyArray1<f64>>,
+)> {
+    let q_view = qmatrix.as_array();
+    let q_shape = q_view.shape();
+    let q_slice = q_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("Q matrix must be C-contiguous"))?;
+    if q_shape[0] != q_shape[1] {
+        return Err(PyValueError::new_err("QUBO matrix must be square"));
+    }
+    let (offsets, neighbors, weights) = py
+        .allow_threads(|| sparse::build_sparse_neighbors_impl(q_slice, q_shape[0], threshold))
+        .map_err(PyValueError::new_err)?;
+
+    Ok((
+        PyArray1::from_vec_bound(py, offsets),
+        PyArray1::from_vec_bound(py, neighbors),
+        PyArray1::from_vec_bound(py, weights),
+    ))
+}
+
+#[pyfunction(signature = (
+    states,
+    energies,
+    qmatrix,
+    offsets,
+    neighbors,
+    weights,
+    betas,
+    sweeps_per_step = 1,
+    rng_state = 0,
+    top_k = 16
+))]
+fn sa_phase2_delta_cache<'py>(
+    py: Python<'py>,
+    states: PyReadonlyArray2<'py, f64>,
+    energies: PyReadonlyArray1<'py, f64>,
+    qmatrix: PyReadonlyArray2<'py, f64>,
+    offsets: PyReadonlyArray1<'py, i64>,
+    neighbors: PyReadonlyArray1<'py, i64>,
+    weights: PyReadonlyArray1<'py, f64>,
+    betas: PyReadonlyArray1<'py, f64>,
+    sweeps_per_step: usize,
+    rng_state: u64,
+    top_k: usize,
+) -> PyResult<(
+    Bound<'py, PyArray2<f64>>,
+    Bound<'py, PyArray1<f64>>,
+    PyObject,
+)> {
+    let s_view = states.as_array();
+    let e_view = energies.as_array();
+    let q_view = qmatrix.as_array();
+    let o_view = offsets.as_array();
+    let n_view = neighbors.as_array();
+    let w_view = weights.as_array();
+    let b_view = betas.as_array();
+
+    let s_shape = s_view.shape();
+    let q_shape = q_view.shape();
+
+    let states_slice = s_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("States array must be C-contiguous"))?;
+    let energies_slice = e_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("Energies array must be C-contiguous"))?;
+    let q_slice = q_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("Q matrix must be C-contiguous"))?;
+    let offsets_slice = o_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("offsets array must be C-contiguous"))?;
+    let neighbors_slice = n_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("neighbors array must be C-contiguous"))?;
+    let weights_slice = w_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("weights array must be C-contiguous"))?;
+    let betas_slice = b_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("betas array must be C-contiguous"))?;
+
+    if q_shape[0] != q_shape[1] {
+        return Err(PyValueError::new_err("QUBO matrix must be square"));
+    }
+    if s_shape[1] != q_shape[0] {
+        return Err(PyValueError::new_err("State dimension mismatch"));
+    }
+
+    let (next_states_flat, next_energies, next_rng, stats) = py
+        .allow_threads(|| {
+            phase2::sa_phase2_delta_cache_impl(
+                states_slice,
+                s_shape[0],
+                s_shape[1],
+                energies_slice,
+                q_slice,
+                offsets_slice,
+                neighbors_slice,
+                weights_slice,
+                betas_slice,
+                sweeps_per_step,
+                rng_state,
+                top_k,
+            )
+        })
+        .map_err(PyValueError::new_err)?;
+
+    let states_array = Array2::from_shape_vec((s_shape[0], s_shape[1]), next_states_flat)
+        .map_err(|_| PyValueError::new_err("Failed to build states array"))?;
+    let states_py = PyArray2::from_owned_array_bound(py, states_array);
+    let energies_py = PyArray1::from_vec_bound(py, next_energies);
+
+    let stats_dict = PyDict::new_bound(py);
+    stats_dict.set_item("rng_state", next_rng)?;
+    stats_dict.set_item("proposals", stats.proposals)?;
+    stats_dict.set_item("accepted", stats.accepted)?;
+    stats_dict.set_item("top_k", top_k)?;
+    stats_dict.set_item("sweeps_per_step", sweeps_per_step)?;
+    stats_dict.set_item("steps", betas_slice.len())?;
+
+    Ok((states_py, energies_py, stats_dict.into_any().unbind()))
+}
+
+#[pyfunction(signature = (
+    states,
+    energies,
+    best_k = 4,
+    diverse_k = 2,
+    max_entries = 128,
+    near_dup_hamming = 2,
+    replace_margin = 1e-6,
+    include_diverse = true
+))]
+fn pool_select<'py>(
+    py: Python<'py>,
+    states: PyReadonlyArray2<'py, f64>,
+    energies: PyReadonlyArray1<'py, f64>,
+    best_k: usize,
+    diverse_k: usize,
+    max_entries: usize,
+    near_dup_hamming: usize,
+    replace_margin: f64,
+    include_diverse: bool,
+) -> PyResult<(
+    Bound<'py, PyArray2<i64>>,
+    Bound<'py, PyArray1<f64>>,
+    Bound<'py, PyArray1<i64>>,
+    f64,
+)> {
+    let s_view = states.as_array();
+    let e_view = energies.as_array();
+    let s_shape = s_view.shape();
+    let states_slice = s_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("States array must be C-contiguous"))?;
+    let energies_slice = e_view
+        .as_slice()
+        .ok_or_else(|| PyValueError::new_err("Energies array must be C-contiguous"))?;
+    if energies_slice.len() != s_shape[0] {
+        return Err(PyValueError::new_err("Energy size mismatch"));
+    }
+
+    let (rows, mean_dist) = py.allow_threads(|| {
+        let mut pool = pool::SolutionPoolCore::new(
+            best_k.max(1),
+            diverse_k,
+            max_entries.max(1),
+            near_dup_hamming,
+            replace_margin,
+        );
+        let dims = s_shape[1];
+        for shot in 0..s_shape[0] {
+            let start = shot * dims;
+            pool.offer(&states_slice[start..start + dims], energies_slice[shot]);
+        }
+        let mean = pool.mean_pairwise_distance();
+        let rows = pool.results(include_diverse);
+        (rows, mean)
+    });
+
+    let dims = s_shape[1];
+    let mut out_states: Vec<i64> = Vec::with_capacity(rows.len() * dims);
+    let mut out_energies: Vec<f64> = Vec::with_capacity(rows.len());
+    let mut out_counts: Vec<i64> = Vec::with_capacity(rows.len());
+    for row in rows {
+        if row.state.len() != dims {
+            return Err(PyValueError::new_err("pool row dimension mismatch"));
+        }
+        out_states.extend_from_slice(&row.state);
+        out_energies.push(row.energy);
+        out_counts.push(row.count as i64);
+    }
+
+    let states_array =
+        Array2::from_shape_vec((out_energies.len(), dims), out_states)
+            .map_err(|_| PyValueError::new_err("Failed to build pool states array"))?;
+    Ok((
+        PyArray2::from_owned_array_bound(py, states_array),
+        PyArray1::from_vec_bound(py, out_energies),
+        PyArray1::from_vec_bound(py, out_counts),
+        mean_dist,
+    ))
 }
 
 #[pyfunction]
@@ -516,6 +732,9 @@ fn adaptive_bulk_sa<'py>(
 fn _tytan_rust(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(delta_energy, m)?)?;
     m.add_function(wrap_pyfunction!(batch_delta, m)?)?;
+    m.add_function(wrap_pyfunction!(build_sparse_neighbors, m)?)?;
+    m.add_function(wrap_pyfunction!(sa_phase2_delta_cache, m)?)?;
+    m.add_function(wrap_pyfunction!(pool_select, m)?)?;
     m.add_function(wrap_pyfunction!(aggregate_results, m)?)?;
     m.add_function(wrap_pyfunction!(presolve_plan, m)?)?;
     m.add_function(wrap_pyfunction!(sa_step_single_flip, m)?)?;

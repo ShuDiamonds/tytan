@@ -149,6 +149,62 @@ class AdaptiveBulkSASampler:
         for idx in range(states.shape[0]):
             pool.offer(states[idx], float(energies[idx]))
 
+    def _phase2_betas(self, start_step: int) -> np.ndarray:
+        betas = np.empty(max(0, int(self.steps) - int(start_step)), dtype=float)
+        for pos, step in enumerate(range(int(start_step), int(self.steps))):
+            strategy = self.strategy_manager.select()
+            temperature = float(max(self._temperature(step, strategy.get("type", "linear")), 1e-8))
+            betas[pos] = 1.0 / temperature
+        return betas
+
+    @staticmethod
+    def _format_rows(
+        states_i: np.ndarray,
+        energies_f: np.ndarray,
+        counts_i: np.ndarray,
+        index_map: Dict[str, int],
+    ) -> List[List[object]]:
+        results: List[List[object]] = []
+        for row_idx in range(int(states_i.shape[0])):
+            state = states_i[row_idx]
+            mapping = {name: int(state[idx]) for name, idx in index_map.items()}
+            results.append([mapping, float(energies_f[row_idx]), int(counts_i[row_idx])])
+        return results
+
+    def _pool_select_final(
+        self,
+        states: np.ndarray,
+        energies: np.ndarray,
+        index_map: Dict[str, int],
+        include_diverse: bool,
+    ) -> Tuple[List[List[object]], float]:
+        rust = _rust_backend.try_pool_select(
+            states,
+            energies,
+            best_k=min(self.batch_size, int(states.shape[0])),
+            diverse_k=2 if include_diverse else 0,
+            max_entries=self.pool_max_entries,
+            near_dup_hamming=self.near_dup_hamming,
+            replace_margin=self.replace_margin,
+            include_diverse=include_diverse,
+        )
+        if rust is not None:
+            pool_states, pool_energies, pool_counts, mean_dist = rust
+            pool_states_i = np.asarray(pool_states, dtype=np.int64)
+            pool_energies_f = np.asarray(pool_energies, dtype=float)
+            pool_counts_i = np.asarray(pool_counts, dtype=np.int64)
+            return self._format_rows(pool_states_i, pool_energies_f, pool_counts_i, index_map), float(mean_dist)
+
+        pool = SolutionPool(
+            best_k=min(self.batch_size, int(states.shape[0])),
+            diverse_k=2 if include_diverse else 0,
+            max_entries=self.pool_max_entries,
+            near_dup_hamming=self.near_dup_hamming,
+            replace_margin=self.replace_margin,
+        )
+        self._offer_phase_end(pool, states, energies)
+        return pool.to_results(index_map, include_diverse=include_diverse), pool.mean_pairwise_distance()
+
     @staticmethod
     def _delta_cache_init(states: np.ndarray, qmatrix: np.ndarray) -> np.ndarray:
         """Initialize delta-cache for 0/1 state representation.
@@ -186,6 +242,50 @@ class AdaptiveBulkSASampler:
         selected = np.argsort(energies)[:top_k]
         sel_states = np.ascontiguousarray(states[selected], dtype=float)
         sel_energies = np.ascontiguousarray(energies[selected], dtype=float)
+        # Prefer Rust implementation if available; it keeps the delta-cache updates in native code.
+        if _rust_backend.phase2_available():
+            betas = self._phase2_betas(start_step)
+            # Use Rust CSR builder when available, else fall back to Python builder.
+            built = _rust_backend.try_build_sparse_neighbors(qmatrix, threshold=self.sparse_threshold)
+            if built is None:
+                built_py = build_sparse_neighbors(qmatrix, threshold=self.sparse_threshold)
+                offsets, neigh, weights = built_py.offsets, built_py.neighbors, built_py.weights
+            else:
+                offsets, neigh, weights = built
+            rust_rng_state = int(self.rng.randint(1, np.iinfo(np.int64).max))
+            rust_result = _rust_backend.try_sa_phase2_delta_cache(
+                states,
+                energies,
+                qmatrix,
+                offsets,
+                neigh,
+                weights,
+                betas,
+                sweeps_per_step=int(self.phase2_sweeps_per_step),
+                rng_state=rust_rng_state,
+                top_k=int(self.phase2_top_k),
+            )
+            if rust_result is not None:
+                next_states, next_energies, stats = rust_result
+                states = np.ascontiguousarray(np.asarray(next_states), dtype=float)
+                energies = np.ascontiguousarray(np.asarray(next_energies), dtype=float)
+                improvements_total = int(stats.get("accepted", 0))
+                best_idx = int(np.argmin(energies))
+                candidate_best_energy = float(energies[best_idx])
+                if candidate_best_energy < best_energy:
+                    best_energy = candidate_best_energy
+                    best_state = states[best_idx].copy()
+                if self.pool_offer_mode == "phase_end":
+                    self._offer_phase_end(pool, states, energies)
+                elif self.pool_offer_mode == "per_flip":
+                    # Keep behavior similar: offer the selected set at the end of Phase2.
+                    top_k = min(int(self.phase2_top_k), int(states.shape[0]))
+                    selected = np.argsort(energies)[:top_k]
+                    for idx in selected.tolist():
+                        pool.offer(states[int(idx)], float(energies[int(idx)]))
+                pool.offer(best_state, best_energy)
+                return states, energies, best_state, best_energy, improvements_total
+
         delta_cache = self._delta_cache_init(sel_states, qmatrix)
 
         n = int(sel_states.shape[1])
@@ -251,7 +351,7 @@ class AdaptiveBulkSASampler:
         pool: SolutionPool,
         best_state: np.ndarray,
         best_energy: float,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, int]:
+    ):
         """Phase1: dense batch SA with PyTorch on the configured device.
 
         This keeps the same 0/1 state representation as the CPU path.
@@ -327,12 +427,9 @@ class AdaptiveBulkSASampler:
                 best_energy = step_best_energy
                 best_state = torch_states[step_best_idx].detach().to("cpu").numpy().astype(float)
 
-        out_states = torch_states.detach().to("cpu").numpy().astype(float)
-        out_energies = torch_energies.detach().to("cpu").numpy().astype(float)
-        if self.pool_offer_mode == "phase_end":
-            self._offer_phase_end(pool, out_states, out_energies)
+        # Return the torch tensors to avoid forcing a full device->host transfer unless needed.
         pool.offer(best_state, best_energy)
-        return out_states, out_energies, best_state, best_energy, improvements_total
+        return torch_states, torch_energies, best_state, best_energy, improvements_total
 
     @staticmethod
     def _state_diversity(states: np.ndarray) -> float:
@@ -427,13 +524,6 @@ class AdaptiveBulkSASampler:
 
         phase2_start = self._phase2_start()
         if self.device != "cpu":
-            pool = SolutionPool(
-                best_k=min(self.batch_size, shots),
-                diverse_k=2,
-                max_entries=self.pool_max_entries,
-                near_dup_hamming=self.near_dup_hamming,
-                replace_margin=self.replace_margin,
-            )
             states = self.rng.randint(0, 2, size=(shots, qmatrix_f.shape[0])).astype(float)
             states = np.ascontiguousarray(states)
             evaluator = DeltaEvaluator(qmatrix_f)
@@ -445,7 +535,14 @@ class AdaptiveBulkSASampler:
             best_state = states[best_idx].copy()
 
             phase1_steps = min(int(phase2_start), int(self.steps))
-            states, energies, best_state, best_energy, phase1_improvements = self._run_phase1_gpu(
+            pool = SolutionPool(
+                best_k=min(self.batch_size, shots),
+                diverse_k=2,
+                max_entries=self.pool_max_entries,
+                near_dup_hamming=self.near_dup_hamming,
+                replace_margin=self.replace_margin,
+            )
+            torch_states, torch_energies, best_state, best_energy, phase1_improvements = self._run_phase1_gpu(
                 qmatrix_f,
                 states,
                 energies,
@@ -456,31 +553,91 @@ class AdaptiveBulkSASampler:
             )
 
             phase2_improvements = 0
-            if self.phase2_enabled and phase2_start < self.steps:
-                sparse = build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
-                states, energies, best_state, best_energy, phase2_improvements = self._run_phase2_delta_cache(
-                    states,
-                    energies,
-                    qmatrix_f,
-                    sparse,
-                    int(phase2_start),
-                    pool,
-                    best_state,
-                    best_energy,
+            if self.pool_offer_mode == "per_flip":
+                states = torch_states.detach().to("cpu").numpy().astype(float)
+                energies = torch_energies.detach().to("cpu").numpy().astype(float)
+                if self.phase2_enabled and phase2_start < self.steps:
+                    sparse = build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
+                    states, energies, best_state, best_energy, phase2_improvements = self._run_phase2_delta_cache(
+                        states,
+                        energies,
+                        qmatrix_f,
+                        sparse,
+                        int(phase2_start),
+                        pool,
+                        best_state,
+                        best_energy,
+                    )
+                if self.pool_offer_mode == "off":
+                    pool.offer(best_state, best_energy)
+                result = pool.to_results(index_map, include_diverse=include_diverse)
+                pool_mean_dist = pool.mean_pairwise_distance()
+                state_div = self._state_diversity(states)
+            else:
+                # Phase-end mode: avoid transferring all states. Work only on a limited candidate set.
+                try:
+                    import torch
+                except Exception:  # pragma: no cover
+                    torch = None
+                if torch is None:
+                    # Fallback: transfer everything.
+                    cand_states = torch_states.detach().to("cpu").numpy().astype(float)
+                    cand_energies = torch_energies.detach().to("cpu").numpy().astype(float)
+                else:
+                    candidate_count = min(
+                        shots,
+                        max(int(self.pool_max_entries), int(self.phase2_top_k), min(int(self.batch_size) + 2, shots)),
+                    )
+                    _, cand_idx = torch.topk(torch_energies, k=int(candidate_count), largest=False)
+                    cand_states = torch_states[cand_idx].detach().to("cpu").numpy().astype(float)
+                    cand_energies = torch_energies[cand_idx].detach().to("cpu").numpy().astype(float)
+
+                if self.phase2_enabled and phase2_start < self.steps and _rust_backend.phase2_available():
+                    betas = self._phase2_betas(int(phase2_start))
+                    built = _rust_backend.try_build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
+                    if built is None:
+                        built_py = build_sparse_neighbors(qmatrix_f, threshold=self.sparse_threshold)
+                        offsets, neigh, weights = built_py.offsets, built_py.neighbors, built_py.weights
+                    else:
+                        offsets, neigh, weights = built
+                    rust_rng_state = int(self.rng.randint(1, np.iinfo(np.int64).max))
+                    rust_result = _rust_backend.try_sa_phase2_delta_cache(
+                        cand_states,
+                        cand_energies,
+                        qmatrix_f,
+                        offsets,
+                        neigh,
+                        weights,
+                        betas,
+                        sweeps_per_step=int(self.phase2_sweeps_per_step),
+                        rng_state=rust_rng_state,
+                        top_k=min(int(self.phase2_top_k), int(cand_states.shape[0])),
+                    )
+                    if rust_result is not None:
+                        next_states, next_energies, stats = rust_result
+                        cand_states = np.ascontiguousarray(np.asarray(next_states), dtype=float)
+                        cand_energies = np.ascontiguousarray(np.asarray(next_energies), dtype=float)
+                        phase2_improvements = int(stats.get("accepted", 0))
+
+                best_idx = int(np.argmin(cand_energies))
+                best_energy = float(cand_energies[best_idx])
+                best_state = cand_states[best_idx].copy()
+                result, pool_mean_dist = self._pool_select_final(
+                    cand_states,
+                    cand_energies,
+                    index_map,
+                    include_diverse=include_diverse,
                 )
+                state_div = self._state_diversity(cand_states)
 
-            if self.pool_offer_mode == "off":
-                pool.offer(best_state, best_energy)
-
-            result = pool.to_results(index_map, include_diverse=include_diverse)
             stats = {
                 "best_energy": best_energy,
                 "strategy_weights": self.strategy_manager.weights,
                 "log_entries": self.logger.entries,
                 "clamp_mode": self.clamp_manager.clamp_mode,
                 "restart_count": 0,
-                "pool_mean_pairwise_distance": pool.mean_pairwise_distance(),
-                "state_diversity": self._state_diversity(states),
+                "pool_mean_pairwise_distance": pool_mean_dist,
+                "state_diversity": state_div,
                 "phase1_improvements": phase1_improvements,
                 "phase2_improvements": phase2_improvements,
                 "phase2_enabled": bool(self.phase2_enabled),
@@ -495,12 +652,17 @@ class AdaptiveBulkSASampler:
         energies = np.array([evaluator.evaluate(state) for state in states])
         energies = np.ascontiguousarray(energies, dtype=float)
         rust_rng_state = int(self.rng.randint(1, np.iinfo(np.int64).max))
-        pool = SolutionPool(
-            best_k=min(self.batch_size, shots),
-            diverse_k=2,
-            max_entries=self.pool_max_entries,
-            near_dup_hamming=self.near_dup_hamming,
-            replace_margin=self.replace_margin,
+        pool_active = self.pool_offer_mode == "per_flip"
+        pool = (
+            SolutionPool(
+                best_k=min(self.batch_size, shots),
+                diverse_k=2,
+                max_entries=self.pool_max_entries,
+                near_dup_hamming=self.near_dup_hamming,
+                replace_margin=self.replace_margin,
+            )
+            if pool_active
+            else None
         )
         best_idx = int(np.argmin(energies))
         best_energy = float(energies[best_idx])
@@ -550,8 +712,9 @@ class AdaptiveBulkSASampler:
                         for accepted_idx in accepted_indices.tolist():
                             candidate_state = next_states[accepted_idx]
                             candidate_energy = float(next_energies[accepted_idx])
-                            novelty = pool.min_distance_to_pool(candidate_state)
-                            pool.offer(candidate_state, candidate_energy)
+                            novelty = pool.min_distance_to_pool(candidate_state) if pool_active else 0.0
+                            if pool_active:
+                                pool.offer(candidate_state, candidate_energy)
                             reward = -float(next_energies[accepted_idx] - prev_energies[accepted_idx])
                             if self.adaptive:
                                 self.strategy_manager.record(
@@ -579,8 +742,17 @@ class AdaptiveBulkSASampler:
                 states = np.ascontiguousarray(history_states[-1], dtype=float)
                 energies = np.ascontiguousarray(history_energies[-1], dtype=float)
                 rust_rng_state = int(step_stats.get("rng_state", rust_rng_state))
-                pool.offer(best_state, best_energy)
-                result = pool.to_results(index_map, include_diverse=include_diverse)
+                if pool_active:
+                    pool.offer(best_state, best_energy)
+                    result = pool.to_results(index_map, include_diverse=include_diverse)
+                    pool_mean_dist = pool.mean_pairwise_distance()
+                else:
+                    result, pool_mean_dist = self._pool_select_final(
+                        states,
+                        energies,
+                        index_map,
+                        include_diverse=include_diverse,
+                    )
                 stats = {
                     "best_energy": best_energy,
                     "strategy_weights": self.strategy_manager.weights,
@@ -588,7 +760,7 @@ class AdaptiveBulkSASampler:
                     "clamp_mode": self.clamp_manager.clamp_mode,
                     "rust_step_mode": "multi",
                     "restart_count": restart_events,
-                    "pool_mean_pairwise_distance": pool.mean_pairwise_distance(),
+                    "pool_mean_pairwise_distance": pool_mean_dist,
                     "state_diversity": self._state_diversity(states),
                 }
                 if return_stats or self.return_stats:
@@ -624,8 +796,9 @@ class AdaptiveBulkSASampler:
                         for pos, accepted_idx in enumerate(accepted_indices.tolist()):
                             candidate_state = states[accepted_idx]
                             candidate_energy = float(energies[accepted_idx])
-                            novelty = pool.min_distance_to_pool(candidate_state)
-                            pool.offer(candidate_state, candidate_energy)
+                            novelty = pool.min_distance_to_pool(candidate_state) if pool_active else 0.0
+                            if pool_active:
+                                pool.offer(candidate_state, candidate_energy)
                             if self.adaptive:
                                 reward = float(-deltas[pos])
                                 self.strategy_manager.record(
@@ -670,9 +843,10 @@ class AdaptiveBulkSASampler:
                     improvements += 1
                     candidate_state = states[i]
                     candidate_energy = float(energies[i])
-                    novelty = pool.min_distance_to_pool(candidate_state)
-                    pool.offer(candidate_state, candidate_energy)
-                    reward = -change + self.novelty_weight * novelty
+                    novelty = pool.min_distance_to_pool(candidate_state) if pool_active else 0.0
+                    if pool_active:
+                        pool.offer(candidate_state, candidate_energy)
+                    reward = -change + (self.novelty_weight * novelty if pool_active else 0.0)
                     if self.adaptive:
                         self.strategy_manager.record(strategy["name"], reward)
                     if candidate_energy < best_energy:
@@ -704,8 +878,9 @@ class AdaptiveBulkSASampler:
                     best_energy,
                     evaluator,
                 )
-                for idx in restart_indices.tolist():
-                    pool.offer(states[idx], energies[idx])
+                if pool_active:
+                    for idx in restart_indices.tolist():
+                        pool.offer(states[idx], energies[idx])
                 restart_events += 1
                 last_restart_step = step
                 if best_energy < previous_best_energy:
@@ -719,19 +894,28 @@ class AdaptiveBulkSASampler:
                 qmatrix_f,
                 sparse,
                 int(phase2_start),
-                pool,
+                pool if pool is not None else SolutionPool(best_k=1, diverse_k=0),
                 best_state,
                 best_energy,
             )
-        pool.offer(best_state, best_energy)
-        result = pool.to_results(index_map, include_diverse=include_diverse)
+        if pool_active:
+            pool.offer(best_state, best_energy)
+            result = pool.to_results(index_map, include_diverse=include_diverse)
+            pool_mean_dist = pool.mean_pairwise_distance()
+        else:
+            result, pool_mean_dist = self._pool_select_final(
+                states,
+                energies,
+                index_map,
+                include_diverse=include_diverse,
+            )
         stats = {
             "best_energy": best_energy,
             "strategy_weights": self.strategy_manager.weights,
             "log_entries": self.logger.entries,
             "clamp_mode": self.clamp_manager.clamp_mode,
             "restart_count": restart_events,
-            "pool_mean_pairwise_distance": pool.mean_pairwise_distance(),
+            "pool_mean_pairwise_distance": pool_mean_dist,
             "state_diversity": self._state_diversity(states),
             "phase2_improvements": phase2_improvements,
             "phase2_enabled": bool(self.phase2_enabled),

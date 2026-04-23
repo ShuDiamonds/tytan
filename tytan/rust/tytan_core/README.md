@@ -44,6 +44,7 @@ Python からは `tytan/_rust_backend.py` を経由して呼び出します。
 - `TYTAN_RUST` : `off` / `auto` / `on`
 - `TYTAN_RUST_MIN_WORK` : batch delta を使う最小ワーク量
 - `TYTAN_RUST_STEP_MIN_WORK` : step 全体を Rust に寄せる最小ワーク量
+- `TYTAN_RUST_CORE` : AdaptiveBulkSASampler の Rust コアを有効化 (`1` で有効)
 
 Rust 側は contiguous な `float64` / `int64` 配列を前提にしています。
 入力が不連続な場合は Python 側で正規化します。
